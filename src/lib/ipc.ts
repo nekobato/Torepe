@@ -4,12 +4,8 @@ const { ipcRenderer } = process.env.IS_ELECTRON
   ? require('electron')
   : {
       ipcRenderer: {
-        send: (...args: any[]) => {
-          console.log(args);
-        },
-        on: (...args: any[]) => {
-          console.log(args);
-        },
+        send: (..._: any[]) => {},
+        on: (..._: any[]) => {},
       },
     };
 

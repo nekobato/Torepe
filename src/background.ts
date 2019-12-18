@@ -7,6 +7,7 @@ import {
   ipcMain,
   clipboard,
   Rectangle,
+  Menu,
 } from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 const isDevelopment = process.env.NODE_ENV !== 'production';
@@ -21,21 +22,27 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } },
 ]);
 
+const menu = Menu.buildFromTemplate([{ role: 'appMenu' }]);
+Menu.setApplicationMenu(menu);
+
 function createWindow() {
   // Create the browser window.
   controllerWindow = new BrowserWindow({
+    title: 'Torepe - Controller',
     width: 240,
     height: 320,
+    resizable: false,
     webPreferences: {
       nodeIntegration: true,
     },
   });
 
   paperWindow = new BrowserWindow({
-    useContentSize: true,
+    title: 'Torepe - Image',
     frame: false,
     hasShadow: false,
     transparent: true,
+    resizable: true,
     webPreferences: {
       nodeIntegration: true,
     },
@@ -48,7 +55,7 @@ function createWindow() {
     urlPrefix = process.env.WEBPACK_DEV_SERVER_URL as string;
   } else {
     createProtocol('app');
-    urlPrefix = 'app://./';
+    urlPrefix = 'app://./index.html';
   }
 
   controllerWindow.loadURL(`${urlPrefix}#/dropper`);
@@ -90,7 +97,9 @@ function createWindow() {
       case 'set-image':
         if (payload.type === 'clipboard') {
           const image = clipboard.readImage();
-          payload.data = image.toDataURL();
+          if (image) {
+            payload.data = image.toDataURL();
+          }
         }
 
         paperWindow.show();
