@@ -28,6 +28,7 @@ Menu.setApplicationMenu(menu);
 function createWindow() {
   // Create the browser window.
   controllerWindow = new BrowserWindow({
+    title: 'Torepe - Controller',
     width: 240,
     height: 320,
     resizable: false,
@@ -37,10 +38,11 @@ function createWindow() {
   });
 
   paperWindow = new BrowserWindow({
-    useContentSize: true,
+    title: 'Torepe - Image',
     frame: false,
     hasShadow: false,
     transparent: true,
+    resizable: true,
     webPreferences: {
       nodeIntegration: true,
     },
