@@ -33,7 +33,7 @@
     "electron": "^7.1.7",
     "electron-icon-builder": "^1.0.2",
     "eslint": "^5.16.0",
-    "eslint-plugin-vue": "^6.0.2
+    "eslint-plugin-vue": "^6.0.2",
     "eslint-plugin-prettier": "^3.1.2",
     "lint-staged": "^9.4.3",
     "postcss-nested": "^4.2.1",
