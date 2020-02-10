@@ -39,7 +39,7 @@
     "postcss-nested": "^4.2.1",
     "prettier": "^1.19.1",
     "typescript": "~3.7.4",
-    "vue-cli-plugin-electron-builder": "^1.4.4",
+    "vue-cli-plugin-electron-builder": "^1.4.5",
     "vue-template-compiler": "^2.6.11"
   },
   "gitHooks": {
