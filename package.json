@@ -30,7 +30,7 @@
     "@vue/eslint-config-prettier": "^6.0.0",
     "@vue/eslint-config-typescript": "^4.0.0",
     "about-window": "^1.13.2",
-    "electron": "^7.1.7",
+    "electron": "^7.2.4",
     "electron-icon-builder": "^1.0.2",
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^6.0.2",
