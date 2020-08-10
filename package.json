@@ -36,7 +36,7 @@
     "eslint-plugin-vue": "^6.2.2",
     "eslint-plugin-prettier": "^3.1.2",
     "lint-staged": "^10.2.11",
-    "postcss-nested": "^4.2.1",
+    "postcss-nested": "^4.2.3",
     "prettier": "^1.19.1",
     "typescript": "~3.9.7",
     "vue-cli-plugin-electron-builder": "^1.4.6",
