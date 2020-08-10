@@ -29,7 +29,7 @@
     "@vue/cli-service": "^4.4.6",
     "@vue/eslint-config-prettier": "^6.0.0",
     "@vue/eslint-config-typescript": "^4.0.0",
-    "about-window": "^1.13.2",
+    "about-window": "^1.13.4",
     "electron": "^9.0.5",
     "electron-icon-builder": "^1.0.2",
     "eslint": "^5.16.0",
