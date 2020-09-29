@@ -58,6 +58,7 @@ export default paper;
 .paper {
   position: relative;
   height: 100%;
+  overflow: hidden;
   .image {
     width: 100%;
     height: 100%;
