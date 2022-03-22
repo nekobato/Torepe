@@ -1,5 +1,3 @@
-'use strict';
-
 import {
   app,
   protocol,
@@ -9,8 +7,20 @@ import {
   Rectangle,
   Menu,
 } from 'electron';
-import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
+import { release } from 'os';
+import { join } from 'path';
 const isDevelopment = process.env.NODE_ENV !== 'production';
+
+// Disable GPU Acceleration for Windows 7
+if (release().startsWith('6.1')) app.disableHardwareAcceleration();
+
+// Set application name for Windows 10+ notifications
+if (process.platform === 'win32') app.setAppUserModelId(app.getName());
+
+if (!app.requestSingleInstanceLock()) {
+  app.quit();
+  process.exit(0);
+}
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -30,9 +40,10 @@ function createWindow() {
   controllerWindow = new BrowserWindow({
     title: 'Torepe - Controller',
     width: 240,
-    height: 320,
+    height: 400,
     resizable: false,
     webPreferences: {
+      preload: join(__dirname, '../preload/index.cjs'),
       nodeIntegration: true,
     },
   });
@@ -44,6 +55,7 @@ function createWindow() {
     transparent: true,
     resizable: true,
     webPreferences: {
+      preload: join(__dirname, '../preload/index.cjs'),
       nodeIntegration: true,
     },
     show: false,
@@ -51,11 +63,14 @@ function createWindow() {
 
   let urlPrefix: string;
 
-  if (process.env.WEBPACK_DEV_SERVER_URL) {
-    urlPrefix = process.env.WEBPACK_DEV_SERVER_URL as string;
+  if (process.env.NODE_ENV === 'development') {
+    urlPrefix = 'http://localhost:3000/';
   } else {
-    createProtocol('app');
-    urlPrefix = 'app://./index.html';
+    urlPrefix = require('url').format({
+      protocol: 'file',
+      slashes: true,
+      pathname: require('path').join(__dirname, '../renderer/index.html'),
+    });
   }
 
   controllerWindow.loadURL(`${urlPrefix}#/dropper`);
@@ -112,8 +127,14 @@ function createWindow() {
       case 'set-image-size':
         paperWindow.setSize(payload.width, payload.height);
         break;
+      case 'reset-image':
+        paperWindow.hide();
     }
   });
+
+  if (process.env.NODE_ENV === 'development') {
+    controllerWindow.webContents.openDevTools();
+  }
 
   controllerWindow.on('closed', () => {
     app.quit();
@@ -156,7 +177,7 @@ app.on('ready', async () => {
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {
   if (process.platform === 'win32') {
-    process.on('message', data => {
+    process.on('message', (data) => {
       if (data === 'graceful-exit') {
         app.quit();
       }

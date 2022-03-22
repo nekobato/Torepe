@@ -1,6 +1,6 @@
 # Torepe
 
-Transparent window application to work with while comparing the screen under development with the design.
+トレーシングペーパーのように、画面上に透過した画像を被せられるアプリケーションです。実装画面とデザインを細かく比べる際に使います。
 
 <p>
   <img alt="Version" src="https://img.shields.io/github/package-json/v/nekobato/torepe">

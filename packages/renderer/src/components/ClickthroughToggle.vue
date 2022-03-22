@@ -1,9 +1,22 @@
+<script lang="ts" setup>
+const props = defineProps<{
+  status: boolean;
+}>();
+
+const emit = defineEmits<{
+  (e: 'toggle'): void;
+}>();
+
+const toggleClickThrough = () => {
+  emit('toggle');
+};
+</script>
 <template>
   <div
     class="clickthrough-toggle"
     :class="{
-      on: status,
-      off: !status,
+      on: props.status,
+      off: !props.status,
     }"
     @click="toggleClickThrough"
   >
@@ -11,17 +24,6 @@
     <div class="switch" />
   </div>
 </template>
-<script lang="ts">
-import Vue from 'vue';
-export default Vue.extend({
-  props: ['status'],
-  methods: {
-    toggleClickThrough() {
-      this.$emit('toggle');
-    },
-  },
-});
-</script>
 <style lang="postcss" scoped>
 .clickthrough-toggle {
   --toggle-height: 20px;

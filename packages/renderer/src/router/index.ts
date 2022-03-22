@@ -1,13 +1,10 @@
-import Vue from 'vue';
-import VueRouter from 'vue-router';
+import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import Paper from '@/views/Paper.vue';
 import Dropper from '@/views/Dropper.vue';
 import Controller from '@/views/Controller.vue';
 import Cropper from '@/views/Cropper.vue';
 
-Vue.use(VueRouter);
-
-const routes = [
+const routes: RouteRecordRaw[] = [
   {
     path: '/paper',
     name: 'paper',
@@ -30,7 +27,8 @@ const routes = [
   },
 ];
 
-const router = new VueRouter({
+const router = createRouter({
+  history: createWebHashHistory(),
   routes,
 });
 

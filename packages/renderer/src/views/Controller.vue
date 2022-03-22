@@ -1,3 +1,76 @@
+<script lang="ts" setup>
+import Opacity from '@/components/Opacity.vue';
+import ClickthroughToggle from '@/components/ClickthroughToggle.vue';
+import ArrowUp from '@/components/Icons/ArrowUp.vue';
+import ArrowLeft from '@/components/Icons/ArrowLeft.vue';
+import ArrowRight from '@/components/Icons/ArrowRight.vue';
+import ArrowDown from '@/components/Icons/ArrowDown.vue';
+import { onMounted, reactive } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+const state = reactive({
+  clickThrough: false,
+  windowPosition: {
+    x: 0,
+    y: 0,
+  },
+  windowSize: {
+    width: 0,
+    height: 0,
+  },
+});
+
+const onToggle = () => {
+  window.ipc.send('toggle-clickthrough', { toggle: !state.clickThrough });
+  state.clickThrough = !state.clickThrough;
+};
+const moveUp = () => {
+  state.windowPosition.y -= 1;
+  window.ipc.send('set-position', state.windowPosition);
+};
+const moveLeft = () => {
+  state.windowPosition.x -= 1;
+  window.ipc.send('set-position', state.windowPosition);
+};
+const moveRight = () => {
+  state.windowPosition.x += 1;
+  window.ipc.send('set-position', state.windowPosition);
+};
+const moveDown = () => {
+  state.windowPosition.y += 1;
+  window.ipc.send('set-position', state.windowPosition);
+};
+const onChangeSize = () => {
+  window.ipc.send('set-bounds', {
+    width: Number(state.windowSize.width),
+    height: Number(state.windowSize.height),
+  });
+};
+const onChangeOpacity = (opacity: number) => {
+  window.ipc.send('set-opacity', {
+    opacity,
+  });
+};
+const resetImage = () => {
+  window.ipc.send('reset-image');
+  router.push('/dropper');
+};
+
+onMounted(() => {
+  window.ipc.on('window-rectangle', (_, { x, y, width, height }) => {
+    state.windowPosition = {
+      x,
+      y,
+    };
+    state.windowSize = {
+      width,
+      height,
+    };
+  });
+});
+</script>
 <template>
   <div class="controller">
     <div class="transition">
@@ -18,7 +91,7 @@
         <input
           class="field"
           type="number"
-          v-model="windowPosition.x"
+          v-model="state.windowPosition.x"
           disabled
         />
       </div>
@@ -27,7 +100,7 @@
         <input
           class="field"
           type="number"
-          v-model="windowPosition.y"
+          v-model="state.windowPosition.y"
           disabled
         />
       </div>
@@ -38,7 +111,7 @@
         <input
           class="field"
           type="number"
-          v-model="windowSize.width"
+          v-model="state.windowSize.width"
           @change="onChangeSize"
         />
       </div>
@@ -47,98 +120,20 @@
         <input
           class="field"
           type="number"
-          v-model="windowSize.height"
+          v-model="state.windowSize.height"
           @change="onChangeSize"
         />
       </div>
     </div>
     <ClickthroughToggle
       class="toggle"
-      :status="clickThrough"
+      :status="state.clickThrough"
       @toggle="onToggle"
     />
     <Opacity class="range" @change="onChangeOpacity" />
+    <button class="reset" @click="resetImage">Reset</button>
   </div>
 </template>
-
-<script lang="ts">
-import Vue from 'vue';
-import Opacity from '@/components/Opacity.vue';
-import ClickthroughToggle from '@/components/ClickthroughToggle.vue';
-import ArrowUp from '@/components/Icons/ArrowUp.vue';
-import ArrowLeft from '@/components/Icons/ArrowLeft.vue';
-import ArrowRight from '@/components/Icons/ArrowRight.vue';
-import ArrowDown from '@/components/Icons/ArrowDown.vue';
-import { ipcSend, ipcOn } from '@/lib/ipc';
-
-export default Vue.extend({
-  name: 'controller',
-  components: {
-    Opacity,
-    ClickthroughToggle,
-    ArrowUp,
-    ArrowLeft,
-    ArrowRight,
-    ArrowDown,
-  },
-  data() {
-    return {
-      clickThrough: false,
-      windowPosition: {
-        x: 0,
-        y: 0,
-      },
-      windowSize: {
-        width: 0,
-        height: 0,
-      },
-    };
-  },
-  methods: {
-    onToggle() {
-      ipcSend('toggle-clickthrough', { toggle: !this.clickThrough });
-      this.clickThrough = !this.clickThrough;
-    },
-    moveUp() {
-      this.windowPosition.y -= 1;
-      ipcSend('set-position', this.windowPosition);
-    },
-    moveLeft() {
-      this.windowPosition.x -= 1;
-      ipcSend('set-position', this.windowPosition);
-    },
-    moveRight() {
-      this.windowPosition.x += 1;
-      ipcSend('set-position', this.windowPosition);
-    },
-    moveDown() {
-      this.windowPosition.y += 1;
-      ipcSend('set-position', this.windowPosition);
-    },
-    onChangeSize() {
-      ipcSend('set-bounds', {
-        width: Number(this.windowSize.width),
-        height: Number(this.windowSize.height),
-      });
-    },
-    onChangeOpacity(opacity: number) {
-      ipcSend('set-opacity', { opacity: opacity });
-    },
-  },
-  mounted() {
-    ipcOn('window-rectangle', (_, { x, y, width, height }) => {
-      this.$data.windowPosition = {
-        x,
-        y,
-      };
-      this.$data.windowSize = {
-        width,
-        height,
-      };
-    });
-  },
-});
-</script>
 
 <style lang="postcss" scoped>
 .controller {
@@ -189,7 +184,7 @@ export default Vue.extend({
       cursor: pointer;
       &:hover {
         .icon {
-          .fill: rgba(0, 0, 0, 0.7);
+          fill: rgba(0, 0, 0, 0.7);
         }
       }
       &:active {
@@ -229,6 +224,26 @@ export default Vue.extend({
     justify-content: center;
     .field-container.height {
       margin-left: 8px;
+    }
+  }
+  .reset {
+    margin-top: 24px;
+    margin-left: 0;
+    border: 2px solid #cccccc;
+    background: transparent;
+    color: #666666;
+    width: 120px;
+    height: 32px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    font-weight: bold;
+    &:hover {
+      border-color: #404040;
+      color: #4c4c4c;
+    }
+    &:active {
+      border-color: #222222;
+      color: #999999;
     }
   }
 }

@@ -1,3 +1,17 @@
+<script lang="ts" setup>
+import { reactive } from 'vue';
+
+const emit = defineEmits<{
+  (e: 'change', opacity: number): void;
+}>();
+
+const state = reactive({
+  opacity: 100,
+});
+const onChange = () => {
+  emit('change', Number(state.opacity));
+};
+</script>
 <template>
   <div class="opacity">
     <span class="background-text">OPACITY</span>
@@ -6,27 +20,12 @@
       type="range"
       from="0"
       to="100"
-      v-model="opacity"
+      v-model="state.opacity"
       @change="onChange"
     />
-    <span class="opacity-value">{{ opacity }}</span>
+    <span class="opacity-value">{{ state.opacity }}</span>
   </div>
 </template>
-<script lang="ts">
-import Vue from 'vue';
-export default Vue.extend({
-  data() {
-    return {
-      opacity: 100,
-    };
-  },
-  methods: {
-    onChange() {
-      this.$emit('change', Number(this.opacity));
-    },
-  },
-});
-</script>
 <style lang="postcss" scoped>
 .opacity {
   --height: 44px;

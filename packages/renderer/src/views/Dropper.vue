@@ -1,8 +1,48 @@
+<script lang="ts" setup>
+import { reactive } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+const state = reactive({ isDragOver: false });
+
+const onDragOver = () => {
+  state.isDragOver = true;
+};
+const onDrop = (e: DragEvent) => {
+  if (!e.dataTransfer || !e.dataTransfer.files.length) return;
+  const file = e.dataTransfer.files[0];
+  if (!/^image\//.test(file.type)) return;
+  sendFile(file);
+  state.isDragOver = false;
+};
+const onDragLeave = () => {
+  state.isDragOver = false;
+};
+const onChangeFile = (e: any) => {
+  sendFile(e.target.files[0]);
+};
+const sendFile = (file: File) => {
+  const reader = new FileReader();
+  reader.onload = () => {
+    window.ipc.send('set-image', { type: 'data', data: reader.result });
+    goToController();
+  };
+  reader.readAsDataURL(file);
+};
+const fromClipboard = () => {
+  window.ipc.send('set-image', { type: 'clipboard' });
+  goToController();
+};
+const goToController = () => {
+  router.push('/controller');
+};
+</script>
 <template>
   <div class="form">
     <div
       class="drag-area"
-      :class="{ 'on-dragover': isDragOver }"
+      :class="{ 'on-dragover': state.isDragOver }"
       @dragover.prevent="onDragOver"
       @drop.prevent="onDrop"
       @dragleave.prevent="onDragLeave"
@@ -24,54 +64,6 @@
     </div>
   </div>
 </template>
-
-<script lang="ts">
-import Vue from 'vue';
-import { ipcSend } from '../lib/ipc';
-
-export default Vue.extend({
-  name: 'dropper',
-  data() {
-    return {
-      isDragOver: false,
-    };
-  },
-  methods: {
-    onDragOver() {
-      this.isDragOver = true;
-    },
-    onDrop(e: DragEvent) {
-      if (!e.dataTransfer || !e.dataTransfer.files.length) return;
-      const file = e.dataTransfer.files[0];
-      if (!/^image\//.test(file.type)) return;
-      this.sendFile(file);
-      this.isDragOver = false;
-    },
-    onDragLeave() {
-      this.isDragOver = false;
-    },
-    onChangeFile(e: any) {
-      this.sendFile(e.target.files[0]);
-    },
-    sendFile(file: File) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        ipcSend('set-image', { type: 'data', data: reader.result });
-        this.goToController();
-      };
-      reader.readAsDataURL(file);
-    },
-    fromClipboard() {
-      ipcSend('set-image', { type: 'clipboard' });
-      this.goToController();
-    },
-    goToController() {
-      this.$router.push('/controller');
-    },
-  },
-});
-</script>
-
 <style lang="postcss" scoped>
 .form {
   padding: 16px;
