@@ -32,7 +32,7 @@
     "vite": "^2.9.1",
     "vite-plugin-resolve": "^2.0.2",
     "vue-tsc": "^0.34.5",
-    "vue": "^3.2.25",
+    "vue": "^3.2.33",
     "vue-router": "^4.0.14"
   },
   "env": {
