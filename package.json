@@ -24,7 +24,7 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^2.3.3",
     "electron": "19.0.9",
-    "electron-builder": "^23.1.0",
+    "electron-builder": "^23.3.3",
     "electron-icon-builder": "^2.0.1",
     "postcss-nested": "^5.0.6",
     "prettier": "^2.7.1",
