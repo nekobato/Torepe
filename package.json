@@ -26,7 +26,7 @@
     "electron": "19.0.9",
     "electron-builder": "^23.1.0",
     "electron-icon-builder": "^2.0.1",
-    "postcss-nested": "^5.0.6",
+    "postcss-nested": "^6.0.0",
     "prettier": "^2.7.1",
     "typescript": "^4.7.4",
     "vite": "^2.9.13",
