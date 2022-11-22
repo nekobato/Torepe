@@ -23,7 +23,7 @@
   "main": "dist/main/index.cjs",
   "devDependencies": {
     "@vitejs/plugin-vue": "^2.3.4",
-    "electron": "21.2.3",
+    "electron": "21.3.0",
     "electron-builder": "^23.6.0",
     "electron-icon-builder": "^2.0.1",
     "postcss-nested": "^6.0.0",
