@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { reactive } from 'vue';
+import { onMounted, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -23,20 +23,25 @@ const onChangeFile = (e: any) => {
   sendFile(e.target.files[0]);
 };
 const sendFile = (file: File) => {
+  console.log(file.type);
   const reader = new FileReader();
   reader.onload = () => {
     window.ipc.send('set-image', { type: 'data', data: reader.result });
-    goToController();
   };
   reader.readAsDataURL(file);
 };
 const fromClipboard = () => {
   window.ipc.send('set-image', { type: 'clipboard' });
-  goToController();
 };
 const goToController = () => {
   router.push('/controller');
 };
+
+onMounted(() => {
+  window.ipc.on('goto-controller', () => {
+    goToController();
+  });
+});
 </script>
 <template>
   <div class="form">

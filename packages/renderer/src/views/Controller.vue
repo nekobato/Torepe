@@ -105,6 +105,12 @@ onMounted(() => {
         />
       </div>
     </div>
+    <div class="original-size-container">
+      <span class="label">ORIGINAL SIZE</span>
+      <span class="size"
+        >{{ state.windowSize.width }} x {{ state.windowSize.height }}</span
+      >
+    </div>
     <div class="size-fields">
       <div class="field-container width">
         <span class="label">WIDTH</span>
@@ -219,6 +225,7 @@ onMounted(() => {
     }
   }
   .size-fields {
+    margin-top: 8px;
     position: relative;
     display: flex;
     justify-content: center;
@@ -245,6 +252,24 @@ onMounted(() => {
       border-color: #222222;
       color: #999999;
     }
+  }
+}
+.original-size-container {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 48px;
+  .label {
+    font-size: 12px;
+    font-weight: bold;
+    color: rgba(0, 0, 0, 0.4);
+  }
+  .size {
+    margin-top: 4px;
+    font-size: 16px;
+    line-height: 1;
+    color: rgba(0, 0, 0, 0.7);
   }
 }
 </style>

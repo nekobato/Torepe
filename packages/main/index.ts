@@ -6,6 +6,7 @@ import {
   clipboard,
   Rectangle,
   Menu,
+  dialog,
 } from 'electron';
 import { release } from 'os';
 import { join } from 'path';
@@ -40,7 +41,7 @@ function createWindow() {
   controllerWindow = new BrowserWindow({
     title: 'Torepe - Controller',
     width: 240,
-    height: 400,
+    height: 440,
     resizable: false,
     webPreferences: {
       preload: join(__dirname, '../preload/index.cjs'),
@@ -112,8 +113,15 @@ function createWindow() {
       case 'set-image':
         if (payload.type === 'clipboard') {
           const image = clipboard.readImage();
-          if (image) {
+
+          if (image.getSize().height > 0 && image.getSize().width > 0) {
             payload.data = image.toDataURL();
+          } else {
+            dialog.showErrorBox(
+              'クリップボードに画像がありません',
+              '画像をコピーしてから再度お試しください'
+            );
+            return;
           }
         }
 
@@ -123,6 +131,7 @@ function createWindow() {
           'window-rectangle',
           paperWindow.getBounds()
         );
+        controllerWindow.webContents?.send('goto-controller');
         break;
       case 'set-image-size':
         paperWindow.setSize(payload.width, payload.height);
