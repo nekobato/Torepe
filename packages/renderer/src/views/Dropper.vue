@@ -69,7 +69,7 @@ onMounted(() => {
     </div>
   </div>
 </template>
-<style lang="postcss" scoped>
+<style lang="scss" scoped>
 .form {
   padding: 16px;
   width: 100%;

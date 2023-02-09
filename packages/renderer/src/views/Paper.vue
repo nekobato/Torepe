@@ -44,7 +44,7 @@ onMounted(() => {
 });
 </script>
 
-<style lang="postcss" scoped>
+<style lang="scss" scoped>
 .paper {
   position: relative;
   height: 100%;

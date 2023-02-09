@@ -24,7 +24,7 @@ const toggleClickThrough = () => {
     <div class="switch" />
   </div>
 </template>
-<style lang="postcss" scoped>
+<style lang="scss" scoped>
 .clickthrough-toggle {
   --toggle-height: 20px;
   position: relative;

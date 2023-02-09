@@ -86,24 +86,6 @@ onMounted(() => {
       <button class="arrow down" @click="moveDown">
         <ArrowDown class="icon" />
       </button>
-      <div class="field-container x">
-        <span class="label">X</span>
-        <input
-          class="field"
-          type="number"
-          v-model="state.windowPosition.x"
-          disabled
-        />
-      </div>
-      <div class="field-container y">
-        <span class="label">Y</span>
-        <input
-          class="field"
-          type="number"
-          v-model="state.windowPosition.y"
-          disabled
-        />
-      </div>
     </div>
     <div class="original-size-container">
       <span class="label">ORIGINAL SIZE</span>
@@ -141,7 +123,7 @@ onMounted(() => {
   </div>
 </template>
 
-<style lang="postcss" scoped>
+<style lang="scss" scoped>
 .controller {
   display: flex;
   flex-direction: column;
@@ -149,11 +131,8 @@ onMounted(() => {
   align-items: center;
   height: 100%;
   border: 1px solid #ddd;
-  .toggle {
-    margin-top: 16px;
-  }
+  gap: 8px;
   .range {
-    margin-top: 8px;
     width: 160px;
     text-align: center;
   }
@@ -176,8 +155,8 @@ onMounted(() => {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 160px;
-    height: 160px;
+    width: 120px;
+    height: 100px;
     .field-container.y {
       margin-top: 16px;
     }

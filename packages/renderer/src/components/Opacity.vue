@@ -26,7 +26,7 @@ const onChange = () => {
     <span class="opacity-value">{{ state.opacity }}</span>
   </div>
 </template>
-<style lang="postcss" scoped>
+<style lang="scss" scoped>
 .opacity {
   --height: 44px;
   position: relative;

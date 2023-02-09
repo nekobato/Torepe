@@ -75,13 +75,13 @@ const onMouseMove = (e: MouseEvent) => {
   </div>
 </template>
 
-<style lang="postcss">
+<style lang="scss">
 body,
 html {
   height: 100%;
 }
 </style>
-<style lang="postcss" scoped>
+<style lang="scss" scoped>
 .cropper {
   width: 100%;
   height: 100%;
