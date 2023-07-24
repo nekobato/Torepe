@@ -5,7 +5,7 @@ import ArrowUp from '@/components/Icons/ArrowUp.vue';
 import ArrowLeft from '@/components/Icons/ArrowLeft.vue';
 import ArrowRight from '@/components/Icons/ArrowRight.vue';
 import ArrowDown from '@/components/Icons/ArrowDown.vue';
-import { reactive } from 'vue';
+import { reactive, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { Icon } from '@iconify/vue';
 
@@ -52,12 +52,45 @@ const moveWindow = (direction: 'up' | 'left' | 'right' | 'down') => {
     y: state.windowPosition.y,
   });
 };
-const onChangeSize = () => {
+const onChangeWidth = (
+  windowSize: { width: number; height: number },
+  e: InputEvent
+) => {
+  const newWidth = (e.target as HTMLInputElement).value;
+  if (state.aspectLink) {
+    state.windowSize.height = Math.round(
+      Number(newWidth) / (windowSize.width / windowSize.height)
+    );
+    state.windowSize.width = Number(newWidth);
+  } else {
+    state.windowSize.width = Number(newWidth);
+  }
+
   window.ipc.send('set-bounds', {
     width: Number(state.windowSize.width),
     height: Number(state.windowSize.height),
   });
 };
+const onChangeHeight = (
+  windowSize: { width: number; height: number },
+  e: InputEvent
+) => {
+  const newHeight = (e.target as HTMLInputElement).value;
+  if (state.aspectLink) {
+    state.windowSize.width = Math.round(
+      Number(newHeight) * (windowSize.width / windowSize.height)
+    );
+    state.windowSize.height = Number(newHeight);
+  } else {
+    state.windowSize.height = Number(newHeight);
+  }
+
+  window.ipc.send('set-bounds', {
+    width: Number(state.windowSize.width),
+    height: Number(state.windowSize.height),
+  });
+};
+
 const onChangeOpacity = (opacity: number) => {
   window.ipc.send('set-opacity', {
     opacity,
@@ -123,8 +156,8 @@ window.ipc.on('window-rectangle', (_, { x, y, width, height, original }) => {
         <input
           class="field"
           type="number"
-          v-model="state.windowSize.width"
-          @change="onChangeSize"
+          :value="state.windowSize.width"
+          @change="onChangeWidth(state.windowSize, $event)"
         />
       </div>
       <div class="field-container height">
@@ -132,8 +165,8 @@ window.ipc.on('window-rectangle', (_, { x, y, width, height, original }) => {
         <input
           class="field"
           type="number"
-          v-model="state.windowSize.height"
-          @change="onChangeSize"
+          :value="state.windowSize.height"
+          @change="onChangeHeight(state.windowSize, $event)"
         />
       </div>
       <button class="link-aspect-button" @click="linkAspect">
