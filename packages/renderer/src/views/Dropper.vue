@@ -23,7 +23,6 @@ const onChangeFile = (e: any) => {
   sendFile(e.target.files[0]);
 };
 const sendFile = (file: File) => {
-  console.log(file.type);
   const reader = new FileReader();
   reader.onload = () => {
     window.ipc.send('set-image', { type: 'data', data: reader.result });

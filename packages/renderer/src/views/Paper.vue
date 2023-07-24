@@ -6,10 +6,22 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, reactive, ref } from 'vue';
+import { parsePngFormat } from 'png-dpi-reader-writer';
+import { computed, reactive, ref } from 'vue';
 
 const state = reactive({ src: '', opacity: 100 });
 const image = ref<HTMLImageElement | null>(null);
+
+const dataUrlToArrayBuffer = (dataUrl: string) => {
+  const base64 = dataUrl.split(',')[1];
+  const binaryString = window.atob(base64);
+  const len = binaryString.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes.buffer;
+};
 
 const paperStyle = computed(() => {
   return {
@@ -20,27 +32,23 @@ const paperStyle = computed(() => {
 const setOpacity = (opacity: number) => {
   state.opacity = opacity;
 };
-const setImage = (payload: any) => {
-  state.src = payload.data;
-};
 const onLoad = () => {
+  const arrayBuffer = dataUrlToArrayBuffer(state.src);
+  const { width, height, dpi } = parsePngFormat(arrayBuffer);
+
+  const per = dpi ? dpi / 72 : window.devicePixelRatio;
+
   window.ipc.send('set-image-size', {
-    width: image.value?.naturalWidth,
-    height: image.value?.naturalHeight,
+    width: width / per,
+    height: height / per,
   });
 };
 
-onMounted(() => {
-  window.ipc.on('set-opacity', (e, payload) => {
-    setOpacity(payload.opacity);
-  });
-  window.ipc.on('set-image', (e, payload) => {
-    if (payload.type === 'data') {
-      setImage(payload);
-    } else if (payload.type === 'clipboard') {
-      setImage(payload);
-    }
-  });
+window.ipc.on('set-opacity', (_, payload) => {
+  setOpacity(payload.opacity);
+});
+window.ipc.on('set-image', (_, payload) => {
+  state.src = payload.data;
 });
 </script>
 
@@ -48,10 +56,6 @@ onMounted(() => {
 .paper {
   position: relative;
   height: 100%;
-  .image {
-    width: 100%;
-    height: 100%;
-  }
   .overlayer {
     position: absolute;
     top: 0;
@@ -60,6 +64,11 @@ onMounted(() => {
     height: 100%;
     -webkit-user-select: none;
     -webkit-app-region: drag;
+    cursor: grab;
   }
+}
+.image {
+  width: 100%;
+  height: 100%;
 }
 </style>

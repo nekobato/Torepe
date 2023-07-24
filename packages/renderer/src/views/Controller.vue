@@ -5,8 +5,9 @@ import ArrowUp from '@/components/Icons/ArrowUp.vue';
 import ArrowLeft from '@/components/Icons/ArrowLeft.vue';
 import ArrowRight from '@/components/Icons/ArrowRight.vue';
 import ArrowDown from '@/components/Icons/ArrowDown.vue';
-import { onMounted, reactive } from 'vue';
+import { reactive } from 'vue';
 import { useRouter } from 'vue-router';
+import { Icon } from '@iconify/vue';
 
 const router = useRouter();
 
@@ -20,27 +21,36 @@ const state = reactive({
     width: 0,
     height: 0,
   },
+  imageSize: {
+    width: 0,
+    height: 0,
+  },
+  aspectLink: false,
 });
 
 const onToggle = () => {
   window.ipc.send('toggle-clickthrough', { toggle: !state.clickThrough });
   state.clickThrough = !state.clickThrough;
 };
-const moveUp = () => {
-  state.windowPosition.y -= 1;
-  window.ipc.send('set-position', state.windowPosition);
-};
-const moveLeft = () => {
-  state.windowPosition.x -= 1;
-  window.ipc.send('set-position', state.windowPosition);
-};
-const moveRight = () => {
-  state.windowPosition.x += 1;
-  window.ipc.send('set-position', state.windowPosition);
-};
-const moveDown = () => {
-  state.windowPosition.y += 1;
-  window.ipc.send('set-position', state.windowPosition);
+const moveWindow = (direction: 'up' | 'left' | 'right' | 'down') => {
+  switch (direction) {
+    case 'up':
+      state.windowPosition.y -= 1;
+      break;
+    case 'left':
+      state.windowPosition.x -= 1;
+      break;
+    case 'right':
+      state.windowPosition.x += 1;
+      break;
+    case 'down':
+      state.windowPosition.y += 1;
+      break;
+  }
+  window.ipc.send('set-position', {
+    x: state.windowPosition.x,
+    y: state.windowPosition.y,
+  });
 };
 const onChangeSize = () => {
   window.ipc.send('set-bounds', {
@@ -57,40 +67,54 @@ const resetImage = () => {
   window.ipc.send('reset-image');
   router.push('/dropper');
 };
+const linkAspect = () => {
+  state.aspectLink = !state.aspectLink;
+  window.ipc.send('link-aspect', {
+    link: state.aspectLink,
+    ratio: state.windowSize.width / state.windowSize.height,
+  });
+};
 
-onMounted(() => {
-  window.ipc.on('window-rectangle', (_, { x, y, width, height }) => {
-    state.windowPosition = {
-      x,
-      y,
-    };
-    state.windowSize = {
+window.ipc.on('window-rectangle', (_, { x, y, width, height, original }) => {
+  state.windowPosition = {
+    x,
+    y,
+  };
+  state.windowSize = {
+    width,
+    height,
+  };
+  if (original) {
+    state.imageSize = {
       width,
       height,
     };
-  });
+  }
 });
 </script>
 <template>
   <div class="controller">
+    <button class="reset" @click="resetImage">
+      <Icon icon="ion:arrow-back" class="icon" />
+    </button>
     <div class="transition">
-      <button class="arrow up" @click="moveUp">
+      <button class="arrow up" @click="moveWindow('up')">
         <ArrowUp class="icon" />
       </button>
-      <button class="arrow left" @click="moveLeft">
+      <button class="arrow left" @click="moveWindow('left')">
         <ArrowLeft class="icon" />
       </button>
-      <button class="arrow right" @click="moveRight">
+      <button class="arrow right" @click="moveWindow('right')">
         <ArrowRight class="icon" />
       </button>
-      <button class="arrow down" @click="moveDown">
+      <button class="arrow down" @click="moveWindow('down')">
         <ArrowDown class="icon" />
       </button>
     </div>
     <div class="original-size-container">
       <span class="label">ORIGINAL SIZE</span>
       <span class="size"
-        >{{ state.windowSize.width }} x {{ state.windowSize.height }}</span
+        >{{ state.imageSize.width }} x {{ state.imageSize.height }}</span
       >
     </div>
     <div class="size-fields">
@@ -112,6 +136,14 @@ onMounted(() => {
           @change="onChangeSize"
         />
       </div>
+      <button class="link-aspect-button" @click="linkAspect">
+        <Icon
+          icon="ion:link"
+          class="link-aspect-icon"
+          v-if="state.aspectLink"
+        />
+        <Icon icon="ion:unlink" class="link-aspect-icon" v-else />
+      </button>
     </div>
     <ClickthroughToggle
       class="toggle"
@@ -119,12 +151,12 @@ onMounted(() => {
       @toggle="onToggle"
     />
     <Opacity class="range" @change="onChangeOpacity" />
-    <button class="reset" @click="resetImage">Reset</button>
   </div>
 </template>
 
 <style lang="scss" scoped>
 .controller {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -212,26 +244,6 @@ onMounted(() => {
       margin-left: 8px;
     }
   }
-  .reset {
-    margin-top: 24px;
-    margin-left: 0;
-    border: 2px solid #cccccc;
-    background: transparent;
-    color: #666666;
-    width: 120px;
-    height: 32px;
-    border-radius: 20px;
-    text-transform: uppercase;
-    font-weight: bold;
-    &:hover {
-      border-color: #404040;
-      color: #4c4c4c;
-    }
-    &:active {
-      border-color: #222222;
-      color: #999999;
-    }
-  }
 }
 .original-size-container {
   flex-shrink: 0;
@@ -249,6 +261,57 @@ onMounted(() => {
     font-size: 16px;
     line-height: 1;
     color: rgba(0, 0, 0, 0.7);
+  }
+}
+.reset {
+  position: absolute;
+  top: 4px;
+  left: 8px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 8px;
+  margin-left: 0;
+  border: 2px solid #cccccc;
+  background: transparent;
+  color: #666666;
+  width: 40px;
+  height: 32px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  font-weight: bold;
+  &:hover {
+    border-color: #404040;
+    color: #4c4c4c;
+  }
+  &:active {
+    border-color: #222222;
+    color: #999999;
+  }
+  .icon {
+    width: 20px;
+    height: 20px;
+  }
+}
+.link-aspect-button {
+  margin-left: 8px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 100%;
+  background-color: transparent;
+  border-radius: 4px;
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+  &:active {
+    background-color: rgba(0, 0, 0, 0.2);
+  }
+  .link-aspect-icon {
+    color: rgba(0, 0, 0, 0.4);
+    width: 24px;
+    height: 24px;
   }
 }
 </style>
