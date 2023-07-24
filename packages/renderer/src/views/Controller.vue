@@ -54,7 +54,7 @@ const moveWindow = (direction: 'up' | 'left' | 'right' | 'down') => {
 };
 const onChangeWidth = (
   windowSize: { width: number; height: number },
-  e: InputEvent
+  e: Event
 ) => {
   const newWidth = (e.target as HTMLInputElement).value;
   if (state.aspectLink) {
@@ -73,7 +73,7 @@ const onChangeWidth = (
 };
 const onChangeHeight = (
   windowSize: { width: number; height: number },
-  e: InputEvent
+  e: Event
 ) => {
   const newHeight = (e.target as HTMLInputElement).value;
   if (state.aspectLink) {
