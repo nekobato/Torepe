@@ -32,15 +32,17 @@ const paperStyle = computed(() => {
 const setOpacity = (opacity: number) => {
   state.opacity = opacity;
 };
-const onLoad = () => {
+const onLoad = (e: Event) => {
+  const imageElement = e.currentTarget as HTMLImageElement;
+
   const arrayBuffer = dataUrlToArrayBuffer(state.src);
   const { width, height, dpi } = parsePngFormat(arrayBuffer);
 
   const per = dpi ? dpi / 72 : window.devicePixelRatio;
 
   window.ipc.send('set-image-size', {
-    width: width / per,
-    height: height / per,
+    width: Math.round(width / per) || imageElement.naturalWidth,
+    height: Math.round(height / per) || imageElement.naturalHeight,
   });
 };
 
