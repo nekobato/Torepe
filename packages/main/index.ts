@@ -46,6 +46,7 @@ function createWindow() {
     webPreferences: {
       preload: join(__dirname, '../preload/index.cjs'),
       nodeIntegration: true,
+      devTools: isDevelopment,
     },
   });
 
@@ -55,9 +56,11 @@ function createWindow() {
     hasShadow: false,
     transparent: true,
     resizable: true,
+    roundedCorners: false,
     webPreferences: {
       preload: join(__dirname, '../preload/index.cjs'),
       nodeIntegration: true,
+      devTools: isDevelopment,
     },
     show: false,
   });
@@ -83,15 +86,18 @@ function createWindow() {
 
   paperWindow.on('moved', () => {
     if (!controllerWindow || !paperWindow) return;
-    controllerWindow.webContents.send(
-      'window-rectangle',
-      paperWindow.getBounds()
-    );
+    controllerWindow.webContents.send('window-rectangle', {
+      ...paperWindow.getBounds(),
+      original: false,
+    });
   });
 
-  paperWindow.on('will-resize', (_: Event, rectangle: Rectangle) => {
+  paperWindow.on('will-resize', (_, rectangle) => {
     if (!controllerWindow) return;
-    controllerWindow.webContents.send('window-rectangle', rectangle);
+    controllerWindow.webContents.send('window-rectangle', {
+      ...rectangle,
+      original: false,
+    });
   });
 
   ipcMain.on('renderer-event', (_, event: string, payload: any) => {
@@ -113,36 +119,48 @@ function createWindow() {
       case 'set-image':
         if (payload.type === 'clipboard') {
           const image = clipboard.readImage();
-
-          if (image.getSize().height > 0 && image.getSize().width > 0) {
-            payload.data = image.toDataURL();
-          } else {
+          if (image.isEmpty()) {
             dialog.showErrorBox(
               'クリップボードに画像がありません',
               '画像をコピーしてから再度お試しください'
             );
             return;
           }
+
+          payload.data = image.toDataURL();
         }
 
         paperWindow.show();
         paperWindow.webContents.send(event, payload);
-        controllerWindow.webContents.send(
-          'window-rectangle',
-          paperWindow.getBounds()
-        );
+
         controllerWindow.webContents?.send('goto-controller');
         break;
       case 'set-image-size':
         paperWindow.setSize(payload.width, payload.height);
+        controllerWindow.webContents.send('window-rectangle', {
+          x: paperWindow.getBounds().x,
+          y: paperWindow.getBounds().y,
+          width: payload.width,
+          height: payload.height,
+          original: true,
+        });
         break;
       case 'reset-image':
         paperWindow.hide();
+        break;
+      case 'link-aspect':
+        const { link, ratio } = payload;
+        if (link) {
+          paperWindow.setAspectRatio(ratio);
+        } else {
+          paperWindow.setAspectRatio(0);
+        }
     }
   });
 
   if (process.env.NODE_ENV === 'development') {
     controllerWindow.webContents.openDevTools();
+    paperWindow.webContents.openDevTools();
   }
 
   controllerWindow.on('closed', () => {
@@ -150,40 +168,20 @@ function createWindow() {
   });
 }
 
-// Quit when all windows are closed.
 app.on('window-all-closed', () => {
   app.quit();
 });
 
 app.on('activate', () => {
-  // On macOS it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
   if (controllerWindow === null) {
     createWindow();
   }
 });
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
 app.on('ready', async () => {
-  if (isDevelopment && !process.env.IS_TEST) {
-    // Install Vue Devtools
-    // Devtools extensions are broken in Electron 6.0.0 and greater
-    // See https://github.com/nklayman/vue-cli-plugin-electron-builder/issues/378 for more info
-    // Electron will not launch with Devtools extensions installed on Windows 10 with dark mode
-    // If you are not using Windows 10 dark mode, you may uncomment these lines
-    // In addition, if the linked issue is closed, you can upgrade electron and uncomment these lines
-    // try {
-    //   await installVueDevtools()
-    // } catch (e) {
-    //   console.error('Vue Devtools failed to install:', e.toString())
-    // }
-  }
   createWindow();
 });
 
-// Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {
   if (process.platform === 'win32') {
     process.on('message', (data) => {

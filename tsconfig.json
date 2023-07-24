@@ -10,7 +10,6 @@
     "inlineSourceMap": true,
     "baseUrl": "./",
     "strict": true,
-    "paths": {},
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true
   }
