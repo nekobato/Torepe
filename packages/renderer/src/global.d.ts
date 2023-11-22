@@ -21,7 +21,6 @@ type EventMap = {
 declare global {
   interface Window {
     // Expose some Api through preload script
-    fs: typeof import('fs');
     ipc: {
       send: (event: string, payload?: any) => void;
       on: <K extends keyof EventMap>(

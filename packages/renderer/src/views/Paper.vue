@@ -7,7 +7,7 @@
 
 <script lang="ts" setup>
 import { parsePngFormat } from 'png-dpi-reader-writer';
-import { computed, reactive, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 
 const state = reactive({ src: '', opacity: 100 });
 const image = ref<HTMLImageElement | null>(null);
@@ -46,11 +46,39 @@ const onLoad = (e: Event) => {
   });
 };
 
+const onKeyPress = (e: KeyboardEvent) => {
+  console.log(e.key);
+  switch (e.key) {
+    case 'ArrowUp':
+      window.ipc.send('move-position', { x: 0, y: -1 });
+      break;
+    case 'ArrowDown':
+      window.ipc.send('move-position', { x: 0, y: 1 });
+      break;
+    case 'ArrowLeft':
+      window.ipc.send('move-position', { x: -1, y: 0 });
+      break;
+    case 'ArrowRight':
+      window.ipc.send('move-position', { x: 1, y: 0 });
+      break;
+    default:
+      break;
+  }
+};
+
 window.ipc.on('set-opacity', (_, payload) => {
   setOpacity(payload.opacity);
 });
 window.ipc.on('set-image', (_, payload) => {
   state.src = payload.data;
+});
+
+onMounted(() => {
+  document.addEventListener('keypress', onKeyPress);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('keypress', onKeyPress);
 });
 </script>
 
@@ -58,13 +86,13 @@ window.ipc.on('set-image', (_, payload) => {
 .paper {
   position: relative;
   height: 100%;
+  overflow: hidden;
   .overlayer {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    -webkit-user-select: none;
     -webkit-app-region: drag;
     cursor: grab;
   }

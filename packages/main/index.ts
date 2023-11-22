@@ -4,7 +4,6 @@ import {
   BrowserWindow,
   ipcMain,
   clipboard,
-  Rectangle,
   Menu,
   dialog,
 } from 'electron';
@@ -45,7 +44,6 @@ function createWindow() {
     resizable: false,
     webPreferences: {
       preload: join(__dirname, '../preload/index.cjs'),
-      nodeIntegration: true,
       devTools: isDevelopment,
     },
   });
@@ -59,7 +57,6 @@ function createWindow() {
     roundedCorners: false,
     webPreferences: {
       preload: join(__dirname, '../preload/index.cjs'),
-      nodeIntegration: true,
       devTools: isDevelopment,
     },
     show: false,
@@ -115,6 +112,15 @@ function createWindow() {
         break;
       case 'set-position':
         paperWindow.setBounds(payload);
+        break;
+      case 'move-position':
+        console.log(payload);
+        const bounds = paperWindow.getBounds();
+        paperWindow.setBounds({
+          ...bounds,
+          x: bounds.x + payload.x,
+          y: bounds.y + payload.y,
+        });
         break;
       case 'set-image':
         if (payload.type === 'clipboard') {
