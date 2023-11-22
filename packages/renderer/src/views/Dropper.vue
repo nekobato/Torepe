@@ -51,7 +51,7 @@ onMounted(() => {
       @drop.prevent="onDrop"
       @dragleave.prevent="onDragLeave"
     >
-      <span class="drop-text">Drop image file here</span>
+      <span class="drop-text">Drop</span>
       <span class="or-text">or</span>
       <label class="file-button">
         <input
@@ -60,7 +60,7 @@ onMounted(() => {
           accept="image/*"
           @change="onChangeFile"
         />
-        <span class="text-row">Select file</span>
+        <span class="text-row">Select image file</span>
       </label>
       <button class="clipboard-button" @click="fromClipboard">
         <span class="text-row">Read clipboard</span>

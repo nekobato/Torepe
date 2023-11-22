@@ -1,7 +1,8 @@
 const package = require('./package.json');
 
 module.exports = {
-  appId: 'net.nekobato.torepe',
+  productName: 'TraceOn',
+  appId: 'net.nekobato.trace-on',
   asar: true,
   directories: {
     output: 'release/${version}',
@@ -12,6 +13,13 @@ module.exports = {
     target: ['dmg'],
     // identify: undefined,
     icon: './build/icon.icns',
+    publish: [
+      {
+        provider: "github",
+        owner: "nekobato",
+        repo: "hazy",
+      },
+    ],
   },
   buildVersion: package.version,
 };

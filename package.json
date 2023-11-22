@@ -1,6 +1,6 @@
 {
-  "name": "torepe",
-  "description": "Transparent image window as a tracing paper",
+  "name": "trace-on",
+  "description": "TraceOn: Support design implemetation with overlay comparison, like digital tracing paper.",
   "author": {
     "email": "nekobato@gmail.com",
     "name": "nekobato",
@@ -11,15 +11,14 @@
     "type": "git",
     "url": "https://github.com/nekobato/torepe"
   },
-  "version": "1.4.1",
+  "version": "1.5.0",
   "private": true,
-  "type": "module",
   "scripts": {
     "dev": "NODE_ENV=development node scripts/watch.mjs",
     "prebuild": "NODE_ENV=production vue-tsc --project packages/renderer/tsconfig.json --noEmit && node scripts/build.mjs",
     "build": "NODE_ENV=production electron-builder --config ./electron-builder.config.js",
     "debug": "npm run prebuild && vite ./packages/renderer",
-    "electron:generate-icons": "electron-icon-builder --input=./public/icon.png --output=build --flatten"
+    "electron:generate-icons": "electron-icon-builder --input=./packages/renderer/public/icon.png --output=./build --flatten"
   },
   "main": "dist/main/index.cjs",
   "devDependencies": {
