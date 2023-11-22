@@ -47,7 +47,7 @@ const onLoad = (e: Event) => {
 };
 
 const onKeyPress = (e: KeyboardEvent) => {
-  console.log(e.key);
+  e.preventDefault();
   switch (e.key) {
     case 'ArrowUp':
       window.ipc.send('move-position', { x: 0, y: -1 });
@@ -74,11 +74,11 @@ window.ipc.on('set-image', (_, payload) => {
 });
 
 onMounted(() => {
-  document.addEventListener('keypress', onKeyPress);
+  document.addEventListener('keydown', onKeyPress);
 });
 
 onBeforeUnmount(() => {
-  document.removeEventListener('keypress', onKeyPress);
+  document.removeEventListener('keydown', onKeyPress);
 });
 </script>
 
