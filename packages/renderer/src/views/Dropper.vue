@@ -51,7 +51,7 @@ onMounted(() => {
       @drop.prevent="onDrop"
       @dragleave.prevent="onDragLeave"
     >
-      <span class="drop-text">Drop</span>
+      <span class="drop-text">Drop Image</span>
       <span class="or-text">or</span>
       <label class="file-button">
         <input

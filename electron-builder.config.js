@@ -17,7 +17,7 @@ module.exports = {
       {
         provider: "github",
         owner: "nekobato",
-        repo: "hazy",
+        repo: "torepe",
       },
     ],
   },

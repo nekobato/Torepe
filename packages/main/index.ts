@@ -9,6 +9,7 @@ import {
 } from 'electron';
 import { release } from 'os';
 import { join } from 'path';
+import { checkUpdate } from './autoupdater';
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
 // Disable GPU Acceleration for Windows 7
@@ -22,21 +23,31 @@ if (!app.requestSingleInstanceLock()) {
   process.exit(0);
 }
 
-// Keep a global reference of the window object, if you don't, the window will
-// be closed automatically when the JavaScript object is garbage collected.
 let controllerWindow: BrowserWindow | null;
 let paperWindow: BrowserWindow | null;
 
-// Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } },
 ]);
+
+const updater = checkUpdate();
+
+updater.on('checking-for-update', () => {
+  dialog.showMessageBox({
+    type: 'info',
+    title: 'アップデートのダウンロードが完了しました',
+    message: 'アップデートをインストールしますか？',
+    buttons: ['はい', 'いいえ'],
+  }).then(() => {
+    updater.quitAndInstall();
+  });
+});
+
 
 const menu = Menu.buildFromTemplate([{ role: 'appMenu' }]);
 Menu.setApplicationMenu(menu);
 
 function createWindow() {
-  // Create the browser window.
   controllerWindow = new BrowserWindow({
     title: 'Torepe - Controller',
     width: 240,
