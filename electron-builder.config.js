@@ -1,7 +1,7 @@
 const package = require('./package.json');
 
 module.exports = {
-  productName: 'TraceOn',
+  productName: 'Torepe',
   appId: 'net.nekobato.trace-on',
   asar: true,
   directories: {

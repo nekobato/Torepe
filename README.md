@@ -1,6 +1,6 @@
-# TraceOn
+# Torepe
 
-TraceOn: Support design implemetation with overlay comparison, like digital tracing paper.
+Torepe: Support design implemetation with overlay comparison, like digital tracing paper.
 
 <p>
   <img alt="Version" src="https://img.shields.io/github/package-json/v/nekobato/torepe">
