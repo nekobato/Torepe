@@ -91,7 +91,7 @@ export {
   function builtinModulesExport(modules: string[]) {
     return modules
       .map((moduleId) => {
-        const nodeModule = require(moduleId);
+        const nodeModule = import(moduleId);
         const requireModule = `const M = require("${moduleId}");`;
         const exportDefault = `export default M;`;
         const exportMembers =

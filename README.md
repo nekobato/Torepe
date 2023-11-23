@@ -1,6 +1,6 @@
 # Torepe
 
-Transparent window application to work with while comparing the screen under development with the design.
+Torepe: Support design implemetation with overlay comparison, like digital tracing paper.
 
 <p>
   <img alt="Version" src="https://img.shields.io/github/package-json/v/nekobato/torepe">
@@ -17,6 +17,4 @@ Transparent window application to work with while comparing the screen under dev
 ## Author
 
 * Github: [@nekobato](https://github.com/nekobato)
-* Twitter: [@nekobato](https://twitter.com/nekobato)
 * Website: https://nekobato.net/
-
