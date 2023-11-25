@@ -28,3 +28,5 @@ dist-ssr
 /dist_electron
 /dist
 /release
+
+.env

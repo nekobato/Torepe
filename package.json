@@ -17,6 +17,7 @@
     "dev": "NODE_ENV=development node scripts/watch.mjs",
     "prebuild": "NODE_ENV=production vue-tsc --project packages/renderer/tsconfig.json --noEmit && node scripts/build.mjs",
     "build": "NODE_ENV=production electron-builder --config ./electron-builder.config.js",
+    "publish": "NODE_ENV=production electron-builder --publish always -c ./electron-builder.config.js",
     "debug": "npm run prebuild && vite ./packages/renderer",
     "electron:generate-icons": "electron-icon-builder --input=./packages/renderer/public/icon.png --output=./build --flatten"
   },
