@@ -19,6 +19,8 @@
     "build": "NODE_ENV=production electron-builder --config ./electron-builder.config.js",
     "publish": "NODE_ENV=production electron-builder --publish always -c ./electron-builder.config.js",
     "debug": "npm run prebuild && vite ./packages/renderer",
+    "docs:dev": "vite dev ./packages/docs",
+    "docs:build": "vite build ./packages/docs",
     "electron:generate-icons": "electron-icon-builder --input=./packages/renderer/public/icon.png --output=./build --flatten"
   },
   "main": "dist/main/index.cjs",

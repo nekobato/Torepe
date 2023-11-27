@@ -21,5 +21,8 @@ module.exports = {
       },
     ],
   },
+  dmg: {
+    title: package.name
+  },
   buildVersion: package.version,
 };
