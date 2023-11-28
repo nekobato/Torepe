@@ -23,16 +23,12 @@ main {
   padding: 0 16px 32px;
   width: 360px;
   height: calc(100vh - 32px);
-  border: 1px solid #ddd;
-  border-radius: 16px;
   text-align: left;
   font-size: 14px;
   overflow-y: scroll;
-  font-family: PixelMplus12;
   color: #252525;
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
-  background: #f5f5f5;
 }
 .logo {
   width: 160px;
@@ -77,11 +73,10 @@ h1 {
 }
 .glassmorphism {
   /* From https://css.glass */
-  background: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.72);
   border-radius: 16px;
   box-shadow: 0 4px 32px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
   border: 1px solid rgba(255, 255, 255, 0.32);
 }
 
