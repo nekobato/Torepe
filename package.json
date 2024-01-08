@@ -27,7 +27,7 @@
   "devDependencies": {
     "@iconify/vue": "^4.1.1",
     "@vitejs/plugin-vue": "^4.5.0",
-    "electron": "27.1.0",
+    "electron": "28.1.1",
     "electron-builder": "^24.6.4",
     "electron-icon-builder": "^2.0.1",
     "electron-updater": "^6.1.4",
