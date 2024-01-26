@@ -1,0 +1,35 @@
+{
+  $schema: "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
+  appId: "net.nekobato.torepe",
+  asar: true,
+  productName: "Torepe",
+  directories: {
+    output: "release/${version}",
+  },
+  files: ["out", "resources"],
+  mac: {
+    target: ["dmg"],
+    category: "public.app-category.productivity",
+    icon: "resources/icons/mac/icon.icns",
+    artifactName: "${productName}-Mac-${version}-Installer.${ext}",
+  },
+  win: {
+    target: [
+      {
+        target: "nsis",
+        arch: ["x64"],
+      },
+    ],
+    artifactName: "${productName}-Windows-${version}-Setup.${ext}",
+  },
+  nsis: {
+    oneClick: false,
+    perMachine: false,
+    allowToChangeInstallationDirectory: true,
+    deleteAppDataOnUninstall: false,
+  },
+  linux: {
+    target: ["AppImage"],
+    artifactName: "${productName}-Linux-${version}.${ext}",
+  },
+}
