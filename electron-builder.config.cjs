@@ -12,7 +12,7 @@ const config = {
   files: ["out"],
   mac: {
     target: ["default"],
-    icon: "dist/icons/mac/icon.icns",
+    icon: "out/renderer/icons/mac/icon.icns",
     category: "public.app-category.productivity",
     entitlements: "build/entitlements.mac.plist",
     entitlementsInherit: "build/entitlements.mac.plist",

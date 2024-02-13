@@ -18,7 +18,8 @@
     "dev": "electron-vite dev",
     "build": "electron-vite build && electron-builder --config electron-builder.config.cjs",
     "preview": "electron-vite preview",
-    "release": "electron-vite build && electron-builder --publish always --config electron-builder.config.cjs"
+    "release": "electron-vite build && electron-builder --publish always --config electron-builder.config.cjs",
+    "build:icon": "electron-icon-builder --input=./src/renderer/public/icon.png --output=./src/renderer/public"
   },
   "main": "out/main/index.js",
   "devDependencies": {

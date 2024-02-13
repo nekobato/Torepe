@@ -61,8 +61,13 @@ function createWindow() {
     show: false,
   });
 
-  controllerWindow.loadURL(`${pageRoot}#/dropper`);
-  paperWindow.loadURL(`${pageRoot}#/paper`);
+  if (isDevelopment) {
+    controllerWindow.loadURL(pageRoot + "#/dropper");
+    paperWindow.loadURL(pageRoot + "#/paper");
+  } else {
+    controllerWindow.loadFile(pageRoot, { hash: "dropper" });
+    controllerWindow.loadFile(pageRoot, { hash: "paper" });
+  }
 
   controllerWindow.on("closed", () => {
     controllerWindow = null;
