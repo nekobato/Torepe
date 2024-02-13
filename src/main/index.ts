@@ -1,16 +1,15 @@
 import {
-  app,
-  protocol,
   BrowserWindow,
-  ipcMain,
-  clipboard,
   Menu,
+  app,
+  clipboard,
   dialog,
+  ipcMain,
+  protocol,
 } from "electron";
 import { release } from "os";
-import { join } from "path";
 import { checkUpdate } from "./autoupdater";
-import { pageRoot, preload, serverUrl } from "./static";
+import { pageRoot, preload } from "./static";
 const isDevelopment = process.env.NODE_ENV !== "production";
 
 // Disable GPU Acceleration for Windows 7
@@ -31,20 +30,7 @@ protocol.registerSchemesAsPrivileged([
   { scheme: "app", privileges: { secure: true, standard: true } },
 ]);
 
-const updater = checkUpdate();
-
-updater.on("checking-for-update", () => {
-  dialog
-    .showMessageBox({
-      type: "info",
-      title: "アップデートのダウンロードが完了しました",
-      message: "アップデートをインストールしますか？",
-      buttons: ["はい", "いいえ"],
-    })
-    .then(() => {
-      updater.quitAndInstall();
-    });
-});
+checkUpdate();
 
 const menu = Menu.buildFromTemplate([{ role: "appMenu" }]);
 Menu.setApplicationMenu(menu);

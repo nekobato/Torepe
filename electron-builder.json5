@@ -8,10 +8,16 @@
   },
   files: ["out", "resources"],
   mac: {
-    target: ["dmg"],
+    target: ["default"],
     category: "public.app-category.productivity",
     icon: "resources/icons/mac/icon.icns",
+    entitlements: "build/entitlements.mac.plist",
+    entitlementsInherit: "build/entitlements.mac.plist",
     artifactName: "${productName}-Mac-${version}-Installer.${ext}",
+    notarize: {
+      teamId: "${APPLE_TEAM_ID}",
+    },
+    publish: ["github"],
   },
   win: {
     target: [
