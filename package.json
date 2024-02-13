@@ -16,15 +16,16 @@
   "scripts": {
     "postinstall": "rm -rf node_modules/electron/dist && node node_modules/electron/install.js",
     "dev": "electron-vite dev",
-    "build": "electron-vite build",
+    "build": "electron-vite build && electron-builder --config electron-builder.config.cjs",
     "preview": "electron-vite preview",
-    "release": "electron-vite build && electron-builder --publish always"
+    "release": "electron-vite build && electron-builder --publish always --config electron-builder.config.cjs"
   },
   "main": "out/main/index.js",
   "devDependencies": {
     "@electron/notarize": "^2.2.1",
     "@iconify/vue": "^4.1.1",
     "@vitejs/plugin-vue": "^5.0.4",
+    "dotenv": "^16.4.3",
     "electron": "28.2.2",
     "electron-builder": "^24.9.1",
     "electron-icon-builder": "^2.0.1",

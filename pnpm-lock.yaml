@@ -10,12 +10,18 @@ dependencies:
     version: 0.2.4
 
 devDependencies:
+  '@electron/notarize':
+    specifier: ^2.2.1
+    version: 2.2.1
   '@iconify/vue':
     specifier: ^4.1.1
     version: 4.1.1(vue@3.4.18)
   '@vitejs/plugin-vue':
     specifier: ^5.0.4
     version: 5.0.4(vite@5.1.1)(vue@3.4.18)
+  dotenv:
+    specifier: ^16.4.3
+    version: 16.4.3
   electron:
     specifier: 28.2.2
     version: 28.2.2
@@ -45,7 +51,7 @@ devDependencies:
     version: 5.1.1(sass@1.70.0)
   vite-plugin-electron:
     specifier: ^0.28.2
-    version: 0.28.2(electron@28.2.0)(vite-plugin-electron-renderer@0.14.5)
+    version: 0.28.2(electron@28.2.2)(vite-plugin-electron-renderer@0.14.5)
   vite-plugin-electron-renderer:
     specifier: ^0.14.5
     version: 0.14.5
@@ -323,6 +329,17 @@ packages:
 
   /@electron/notarize@2.1.0:
     resolution: {integrity: sha512-Q02xem1D0sg4v437xHgmBLxI2iz/fc0D4K7fiVWHa/AnW8o7D751xyKNXgziA6HrTOme9ul1JfWN5ark8WH1xA==}
+    engines: {node: '>= 10.0.0'}
+    dependencies:
+      debug: 4.3.4
+      fs-extra: 9.1.0
+      promise-retry: 2.0.1
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
+  /@electron/notarize@2.2.1:
+    resolution: {integrity: sha512-aL+bFMIkpR0cmmj5Zgy0LMKEpgy43/hw5zadEArgmAMWWlKc5buwFvFT9G/o/YJkvXAJm5q3iuTuLaiaXW39sg==}
     engines: {node: '>= 10.0.0'}
     dependencies:
       debug: 4.3.4
@@ -2103,6 +2120,11 @@ packages:
 
   /dotenv-expand@5.1.0:
     resolution: {integrity: sha512-YXQl1DSa4/PQyRfgrv6aoNjhasp/p4qs9FjJ4q4cQk+8m4r6k4ZSiEyytKG8f8W9gi8WsQtIObNmKd+tMzNTmA==}
+    dev: true
+
+  /dotenv@16.4.3:
+    resolution: {integrity: sha512-II98GFrje5psQTSve0E7bnwMFybNLqT8Vu8JIFWRjsE3khyNUm/loZupuy5DVzG2IXf/ysxvrixYOQnM6mjD3A==}
+    engines: {node: '>=12'}
     dev: true
 
   /dotenv@9.0.2:
@@ -4340,7 +4362,7 @@ packages:
     resolution: {integrity: sha512-EQ7ORuPp8vFPCqfuGnVo7d36fXS0IFH4/RUlKb1drseix3TQEPcgwEuFADdXBxRgqMp70njz/1m0kdf5lEsm8w==}
     dev: true
 
-  /vite-plugin-electron@0.28.2(electron@28.2.0)(vite-plugin-electron-renderer@0.14.5):
+  /vite-plugin-electron@0.28.2(electron@28.2.2)(vite-plugin-electron-renderer@0.14.5):
     resolution: {integrity: sha512-RSYvChUSIMN7L4yxW5hqtF8VutJWLRPukxrSWtefEATCZ/PGAf+9l8VQ84UTIk/gbYJghRMOd5139Byhx5pfIw==}
     peerDependencies:
       electron: ^28.0.0
@@ -4354,7 +4376,7 @@ packages:
       vite-plugin-electron-renderer:
         optional: true
     dependencies:
-      electron: 28.2.0
+      electron: 28.2.2
       vite-plugin-electron-renderer: 0.14.5
     dev: true
 

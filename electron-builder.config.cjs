@@ -1,21 +1,23 @@
-{
-  $schema: "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
-  appId: "net.nekobato.torepe",
+require("dotenv").config();
+const pkg = require("./package.json");
+const productName = "Torepe";
+
+const config = {
+  appId: `net.nekobato.${productName}`,
   asar: true,
-  productName: "Torepe",
+  productName,
   directories: {
-    output: "release/${version}",
+    output: `release/${pkg.version}`,
   },
-  files: ["out", "resources"],
+  files: ["out"],
   mac: {
     target: ["default"],
+    icon: "dist/icons/mac/icon.icns",
     category: "public.app-category.productivity",
-    icon: "resources/icons/mac/icon.icns",
     entitlements: "build/entitlements.mac.plist",
     entitlementsInherit: "build/entitlements.mac.plist",
-    artifactName: "${productName}-Mac-${version}-Installer.${ext}",
     notarize: {
-      teamId: "${APPLE_TEAM_ID}",
+      teamId: process.env.APPLE_TEAM_ID,
     },
     publish: ["github"],
   },
@@ -26,7 +28,6 @@
         arch: ["x64"],
       },
     ],
-    artifactName: "${productName}-Windows-${version}-Setup.${ext}",
   },
   nsis: {
     oneClick: false,
@@ -36,6 +37,7 @@
   },
   linux: {
     target: ["AppImage"],
-    artifactName: "${productName}-Linux-${version}.${ext}",
   },
-}
+};
+
+module.exports = config;
