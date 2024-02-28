@@ -30,7 +30,7 @@
     "electron": "28.2.3",
     "electron-builder": "^24.9.1",
     "electron-icon-builder": "^2.0.1",
-    "electron-updater": "^6.1.4",
+    "electron-updater": "^6.1.8",
     "electron-vite": "^2.0.0",
     "prettier": "^3.2.5",
     "sass": "^1.71.0",
