@@ -28,7 +28,7 @@
     "@vitejs/plugin-vue": "^5.0.4",
     "dotenv": "^16.4.5",
     "electron": "28.2.3",
-    "electron-builder": "^24.9.1",
+    "electron-builder": "^24.12.0",
     "electron-icon-builder": "^2.0.1",
     "electron-updater": "^6.1.8",
     "electron-vite": "^2.0.0",
