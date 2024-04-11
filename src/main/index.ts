@@ -8,9 +8,10 @@ import {
   protocol,
 } from "electron";
 import { release } from "os";
+import log from "electron-log";
 import { checkUpdate } from "./autoupdater";
 import { pageRoot, preload } from "./static";
-const isDevelopment = process.env.NODE_ENV !== "production";
+const isDevelopment = process.env.NODE_ENV === "development";
 
 // Disable GPU Acceleration for Windows 7
 if (release().startsWith("6.1")) app.disableHardwareAcceleration();
@@ -37,18 +38,18 @@ Menu.setApplicationMenu(menu);
 
 function createWindow() {
   controllerWindow = new BrowserWindow({
-    title: "Torepe - Controller",
+    title: "Torepe",
     width: 240,
     height: 440,
     resizable: false,
     webPreferences: {
       preload: preload,
-      devTools: isDevelopment,
+      nodeIntegration: true,
     },
   });
 
   paperWindow = new BrowserWindow({
-    title: "Torepe - Image",
+    title: "Torepe",
     frame: false,
     hasShadow: false,
     transparent: true,
@@ -56,7 +57,7 @@ function createWindow() {
     roundedCorners: false,
     webPreferences: {
       preload: preload,
-      devTools: isDevelopment,
+      nodeIntegration: true,
     },
     show: false,
   });
@@ -64,9 +65,11 @@ function createWindow() {
   if (isDevelopment) {
     controllerWindow.loadURL(pageRoot + "#/dropper");
     paperWindow.loadURL(pageRoot + "#/paper");
+    controllerWindow.webContents.openDevTools();
+    paperWindow.webContents.openDevTools();
   } else {
-    controllerWindow.loadFile(pageRoot, { hash: "dropper" });
-    controllerWindow.loadFile(pageRoot, { hash: "paper" });
+    controllerWindow.loadFile(pageRoot, { hash: "/dropper" });
+    paperWindow.loadFile(pageRoot, { hash: "/paper" });
   }
 
   controllerWindow.on("closed", () => {
@@ -153,13 +156,11 @@ function createWindow() {
         } else {
           paperWindow.setAspectRatio(0);
         }
+      case "error":
+        log.error(payload);
+        break;
     }
   });
-
-  if (process.env.NODE_ENV === "development") {
-    controllerWindow.webContents.openDevTools();
-    paperWindow.webContents.openDevTools();
-  }
 
   controllerWindow.on("closed", () => {
     app.quit();
