@@ -59,8 +59,8 @@ devDependencies:
     specifier: ^3.4.22
     version: 3.4.22(typescript@5.4.5)
   vue-router:
-    specifier: ^4.3.0
-    version: 4.3.0(vue@3.4.22)
+    specifier: ^4.3.2
+    version: 4.3.2(vue@3.4.22)
   vue-tsc:
     specifier: ^2.0.14
     version: 2.0.14(typescript@5.4.5)
@@ -4797,8 +4797,8 @@ packages:
       fsevents: 2.3.3
     dev: true
 
-  /vue-router@4.3.0(vue@3.4.22):
-    resolution: {integrity: sha512-dqUcs8tUeG+ssgWhcPbjHvazML16Oga5w34uCUmsk7i0BcnskoLGwjpa15fqMr2Fa5JgVBrdL2MEgqz6XZ/6IQ==}
+  /vue-router@4.3.2(vue@3.4.22):
+    resolution: {integrity: sha512-hKQJ1vDAZ5LVkKEnHhmm1f9pMiWIBNGF5AwU67PdH7TyXCj/a4hTccuUuYCAMgJK6rO/NVYtQIEN3yL8CECa7Q==}
     peerDependencies:
       vue: ^3.2.0
     dependencies:
