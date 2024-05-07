@@ -31,7 +31,7 @@
     "electron-builder": "^24.13.3",
     "electron-icon-builder": "^2.0.1",
     "electron-updater": "^6.1.8",
-    "electron-vite": "^2.1.0",
+    "electron-vite": "^2.2.0",
     "prettier": "^3.2.5",
     "sass": "^1.76.0",
     "typescript": "^5.4.4",
