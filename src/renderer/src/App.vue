@@ -12,7 +12,7 @@ import { RouterView } from "vue-router";
   width: 100vw;
   height: 100vh;
   font-family: "Zen Kaku Gothic New";
-  background-color: #252522;
+  background-color: transparent;
   color: #a5a5a5;
 }
 </style>

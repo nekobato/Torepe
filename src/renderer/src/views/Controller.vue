@@ -181,6 +181,7 @@ window.ipc.on("window-rectangle", (_, { x, y, width, height, original }) => {
   align-items: center;
   height: 100%;
   gap: 8px;
+  background-color: #252522;
 }
 .size-fields {
   margin-top: 52px;
