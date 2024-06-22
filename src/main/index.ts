@@ -40,7 +40,7 @@ function createWindow() {
   controllerWindow = new BrowserWindow({
     title: "Torepe",
     width: 240,
-    height: 440,
+    height: 240,
     resizable: false,
     webPreferences: {
       preload: preload,
@@ -109,7 +109,6 @@ function createWindow() {
         paperWindow.setBounds(payload);
         break;
       case "move-position":
-        console.log(payload);
         const bounds = paperWindow.getBounds();
         paperWindow.setBounds({
           ...bounds,

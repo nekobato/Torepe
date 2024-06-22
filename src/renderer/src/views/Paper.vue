@@ -6,14 +6,21 @@
 </template>
 
 <script lang="ts" setup>
-import { parsePngFormat } from 'png-dpi-reader-writer';
-import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
+import { parsePngFormat } from "png-dpi-reader-writer";
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+  ref,
+} from "vue";
 
-const state = reactive({ src: '', opacity: 100 });
+const state = reactive({ src: "", opacity: 100 });
 const image = ref<HTMLImageElement | null>(null);
 
 const dataUrlToArrayBuffer = (dataUrl: string) => {
-  const base64 = dataUrl.split(',')[1];
+  const base64 = dataUrl.split(",")[1];
   const binaryString = window.atob(base64);
   const len = binaryString.length;
   const bytes = new Uint8Array(len);
@@ -40,45 +47,51 @@ const onLoad = (e: Event) => {
 
   const per = dpi ? dpi / 72 : window.devicePixelRatio;
 
-  window.ipc.send('set-image-size', {
+  const size = {
     width: Math.round(width / per) || imageElement.naturalWidth,
     height: Math.round(height / per) || imageElement.naturalHeight,
+  };
+
+  window.ipc.send("set-image-size", size);
+  window.ipc.send("link-aspect", {
+    link: true,
+    ratio: size.width / size.height,
   });
 };
 
 const onKeyPress = (e: KeyboardEvent) => {
   e.preventDefault();
   switch (e.key) {
-    case 'ArrowUp':
-      window.ipc.send('move-position', { x: 0, y: -1 });
+    case "ArrowUp":
+      window.ipc.send("move-position", { x: 0, y: -1 });
       break;
-    case 'ArrowDown':
-      window.ipc.send('move-position', { x: 0, y: 1 });
+    case "ArrowDown":
+      window.ipc.send("move-position", { x: 0, y: 1 });
       break;
-    case 'ArrowLeft':
-      window.ipc.send('move-position', { x: -1, y: 0 });
+    case "ArrowLeft":
+      window.ipc.send("move-position", { x: -1, y: 0 });
       break;
-    case 'ArrowRight':
-      window.ipc.send('move-position', { x: 1, y: 0 });
+    case "ArrowRight":
+      window.ipc.send("move-position", { x: 1, y: 0 });
       break;
     default:
       break;
   }
 };
 
-window.ipc.on('set-opacity', (_, payload) => {
+window.ipc.on("set-opacity", (_, payload) => {
   setOpacity(payload.opacity);
 });
-window.ipc.on('set-image', (_, payload) => {
+window.ipc.on("set-image", (_, payload) => {
   state.src = payload.data;
 });
 
 onMounted(() => {
-  document.addEventListener('keydown', onKeyPress);
+  document.addEventListener("keydown", onKeyPress);
 });
 
 onBeforeUnmount(() => {
-  document.removeEventListener('keydown', onKeyPress);
+  document.removeEventListener("keydown", onKeyPress);
 });
 </script>
 

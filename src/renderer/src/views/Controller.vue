@@ -1,18 +1,14 @@
 <script lang="ts" setup>
-import Opacity from '@/components/Opacity.vue';
-import ClickthroughToggle from '@/components/ClickthroughToggle.vue';
-import ArrowUp from '@/components/Icons/ArrowUp.vue';
-import ArrowLeft from '@/components/Icons/ArrowLeft.vue';
-import ArrowRight from '@/components/Icons/ArrowRight.vue';
-import ArrowDown from '@/components/Icons/ArrowDown.vue';
-import { reactive, watch } from 'vue';
-import { useRouter } from 'vue-router';
-import { Icon } from '@iconify/vue';
+import { reactive, watch } from "vue";
+import { useRouter } from "vue-router";
+import { Icon } from "@iconify/vue";
+import { ElButton, ElSlider, ElInputNumber } from "element-plus";
 
 const router = useRouter();
 
 const state = reactive({
   clickThrough: false,
+  opacity: 100,
   windowPosition: {
     x: 0,
     y: 0,
@@ -25,90 +21,62 @@ const state = reactive({
     width: 0,
     height: 0,
   },
-  aspectLink: false,
+  aspectLink: true,
 });
 
-const onToggle = () => {
-  window.ipc.send('toggle-clickthrough', { toggle: !state.clickThrough });
+const toggleClickThrough = () => {
+  window.ipc.send("toggle-clickthrough", { toggle: !state.clickThrough });
   state.clickThrough = !state.clickThrough;
 };
-const moveWindow = (direction: 'up' | 'left' | 'right' | 'down') => {
-  switch (direction) {
-    case 'up':
-      state.windowPosition.y -= 1;
-      break;
-    case 'left':
-      state.windowPosition.x -= 1;
-      break;
-    case 'right':
-      state.windowPosition.x += 1;
-      break;
-    case 'down':
-      state.windowPosition.y += 1;
-      break;
-  }
-  window.ipc.send('set-position', {
-    x: state.windowPosition.x,
-    y: state.windowPosition.y,
-  });
-};
-const onChangeWidth = (
-  windowSize: { width: number; height: number },
-  e: Event
-) => {
-  const newWidth = (e.target as HTMLInputElement).value;
+const onChangeWidth = (newWidth?: number) => {
   if (state.aspectLink) {
     state.windowSize.height = Math.round(
-      Number(newWidth) / (windowSize.width / windowSize.height)
+      Number(newWidth) / (state.windowSize.width / state.windowSize.height)
     );
     state.windowSize.width = Number(newWidth);
   } else {
     state.windowSize.width = Number(newWidth);
   }
 
-  window.ipc.send('set-bounds', {
+  window.ipc.send("set-bounds", {
     width: Number(state.windowSize.width),
     height: Number(state.windowSize.height),
   });
 };
-const onChangeHeight = (
-  windowSize: { width: number; height: number },
-  e: Event
-) => {
-  const newHeight = (e.target as HTMLInputElement).value;
+const onChangeHeight = (newHeight?: number) => {
   if (state.aspectLink) {
     state.windowSize.width = Math.round(
-      Number(newHeight) * (windowSize.width / windowSize.height)
+      Number(newHeight) * (state.windowSize.width / state.windowSize.height)
     );
-    state.windowSize.height = Number(newHeight);
-  } else {
-    state.windowSize.height = Number(newHeight);
   }
+  state.windowSize.height = Number(newHeight);
 
-  window.ipc.send('set-bounds', {
+  window.ipc.send("set-bounds", {
     width: Number(state.windowSize.width),
     height: Number(state.windowSize.height),
   });
 };
 
-const onChangeOpacity = (opacity: number) => {
-  window.ipc.send('set-opacity', {
-    opacity,
-  });
-};
 const resetImage = () => {
-  window.ipc.send('reset-image');
-  router.push('/dropper');
+  window.ipc.send("reset-image");
+  router.push("/dropper");
 };
 const linkAspect = () => {
   state.aspectLink = !state.aspectLink;
-  window.ipc.send('link-aspect', {
+  window.ipc.send("link-aspect", {
     link: state.aspectLink,
     ratio: state.windowSize.width / state.windowSize.height,
   });
 };
 
-window.ipc.on('window-rectangle', (_, { x, y, width, height, original }) => {
+watch(
+  () => state.opacity,
+  (newOpacity) => {
+    window.ipc.send("set-opacity", { opacity: newOpacity });
+  }
+);
+
+window.ipc.on("window-rectangle", (_, { x, y, width, height, original }) => {
   state.windowPosition = {
     x,
     y,
@@ -127,63 +95,80 @@ window.ipc.on('window-rectangle', (_, { x, y, width, height, original }) => {
 </script>
 <template>
   <div class="controller">
-    <button class="reset" @click="resetImage">
-      <Icon icon="ion:arrow-back" class="icon" />
-    </button>
-    <div class="transition">
-      <button class="arrow up" @click="moveWindow('up')">
-        <ArrowUp class="icon" />
-      </button>
-      <button class="arrow left" @click="moveWindow('left')">
-        <ArrowLeft class="icon" />
-      </button>
-      <button class="arrow right" @click="moveWindow('right')">
-        <ArrowRight class="icon" />
-      </button>
-      <button class="arrow down" @click="moveWindow('down')">
-        <ArrowDown class="icon" />
-      </button>
-    </div>
+    <ElButton class="reset" @click="resetImage">
+      <Icon class="icon" icon="mingcute:arrow-left-line" />
+    </ElButton>
     <div class="original-size-container">
-      <span class="label">ORIGINAL SIZE</span>
+      <span class="label">画像サイズ</span>
       <span class="size"
         >{{ state.imageSize.width }} x {{ state.imageSize.height }}</span
       >
     </div>
     <div class="size-fields">
-      <div class="field-container width">
-        <span class="label">WIDTH</span>
-        <input
-          class="field"
-          type="number"
-          :value="state.windowSize.width"
-          @change="onChangeWidth(state.windowSize, $event)"
-        />
+      <div class="form-item-group">
+        <div class="form-item">
+          <label>Width</label>
+          <ElInputNumber
+            v-model="state.windowSize.width"
+            :min="1"
+            size="small"
+            class="input"
+            @change="onChangeWidth"
+          />
+        </div>
+        <div class="form-item">
+          <label>Height</label>
+          <ElInputNumber
+            v-model="state.windowSize.height"
+            :min="1"
+            size="small"
+            class="input"
+            @change="onChangeHeight"
+          />
+        </div>
       </div>
-      <div class="field-container height">
-        <span class="label">HEIGHT</span>
-        <input
-          class="field"
-          type="number"
-          :value="state.windowSize.height"
-          @change="onChangeHeight(state.windowSize, $event)"
-        />
-      </div>
-      <button class="link-aspect-button" @click="linkAspect">
+      <ElButton class="link-aspect-button" @click="linkAspect" text circle>
         <Icon
-          icon="ion:link"
+          icon="mingcute:link-2-line"
           class="link-aspect-icon"
           v-if="state.aspectLink"
         />
-        <Icon icon="ion:unlink" class="link-aspect-icon" v-else />
-      </button>
+        <Icon icon="mingcute:unlink-2-line" class="link-aspect-icon" v-else />
+      </ElButton>
     </div>
-    <ClickthroughToggle
-      class="toggle"
-      :status="state.clickThrough"
-      @toggle="onToggle"
-    />
-    <Opacity class="range" @change="onChangeOpacity" />
+    <div class="clickthrough">
+      <ElButton
+        v-model="state.clickThrough"
+        :min="1"
+        :max="100"
+        class="clickthrough-button"
+        :class="{
+          on: state.clickThrough,
+          off: !state.clickThrough,
+        }"
+        @click="toggleClickThrough"
+        text
+      >
+        <Icon
+          icon="mingcute:ghost-fill"
+          class="icon"
+          v-if="state.clickThrough"
+        />
+        <Icon icon="mingcute:ghost-line" class="icon" v-else />
+        <span>Ignore Mouse is</span>
+        <span class="state on" v-if="state.clickThrough">ON</span>
+        <span class="state off" v-else>OFF</span>
+      </ElButton>
+    </div>
+    <div class="opacity">
+      <label>Opacity</label>
+      <ElSlider
+        v-model="state.opacity"
+        :min="1"
+        :max="100"
+        class="opacity-slider"
+      />
+    </div>
   </div>
 </template>
 
@@ -195,156 +180,108 @@ window.ipc.on('window-rectangle', (_, { x, y, width, height, original }) => {
   justify-content: center;
   align-items: center;
   height: 100%;
-  border: 1px solid #ddd;
   gap: 8px;
-  .range {
-    width: 160px;
-    text-align: center;
-  }
-  .field {
-    padding: 2px 4px;
-    width: 56px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 16px;
-    line-height: 24px;
-    text-align: right;
-    &::-webkit-inner-spin-button,
-    &::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-    }
-  }
-  .transition {
-    position: relative;
+}
+.size-fields {
+  margin-top: 52px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  .form-item-group {
     display: flex;
+    align-items: flex-end;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: 120px;
-    height: 100px;
-    .field-container.y {
-      margin-top: 16px;
-    }
-    .arrow {
-      position: absolute;
-      width: 24px;
-      height: 24px;
-      background: #ddd;
-      border-radius: 4px;
-      cursor: pointer;
-      &:hover {
-        .icon {
-          fill: rgba(0, 0, 0, 0.7);
+    gap: 8px;
+    .form-item {
+      label {
+        font-size: 12px;
+        font-weight: bold;
+        text-transform: uppercase;
+        & + .input {
+          margin-left: 4px;
         }
       }
-      &:active {
-        .icon {
-          fill: hsla(220, 30%, 50%, 0.7);
-        }
+      .input {
+        width: 100px;
       }
     }
-    .up {
-      top: 16px;
-    }
-    .left {
-      left: 16px;
-    }
-    .right {
-      right: 16px;
-    }
-    .down {
-      bottom: 16px;
-    }
   }
-  .field-container {
-    position: relative;
-    .label {
-      position: absolute;
-      top: -12px;
-      left: 0;
-      line-height: 1;
-      font-size: 12px;
-      font-weight: bold;
-      color: rgba(0, 0, 0, 0.4);
-    }
-  }
-  .size-fields {
-    margin-top: 8px;
-    position: relative;
-    display: flex;
-    justify-content: center;
-    .field-container.height {
-      margin-left: 8px;
+
+  .link-aspect-button {
+    .link-aspect-icon {
+      width: 20px;
+      height: 20px;
     }
   }
 }
 .original-size-container {
+  position: absolute;
+  top: 8px;
+  right: 8px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-end;
   height: 48px;
   .label {
     font-size: 12px;
     font-weight: bold;
-    color: rgba(0, 0, 0, 0.4);
   }
   .size {
     margin-top: 4px;
-    font-size: 16px;
+    font-size: 18px;
     line-height: 1;
-    color: rgba(0, 0, 0, 0.7);
   }
 }
 .reset {
   position: absolute;
-  top: 4px;
+  top: 8px;
   left: 8px;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 8px;
-  margin-left: 0;
-  border: 2px solid #cccccc;
-  background: transparent;
-  color: #666666;
-  width: 40px;
-  height: 32px;
-  border-radius: 20px;
-  text-transform: uppercase;
-  font-weight: bold;
-  &:hover {
-    border-color: #404040;
-    color: #4c4c4c;
-  }
-  &:active {
-    border-color: #222222;
-    color: #999999;
-  }
-  .icon {
-    width: 20px;
-    height: 20px;
+  .icon + * {
+    margin-left: 4px;
   }
 }
-.link-aspect-button {
-  margin-left: 8px;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  width: 32px;
-  height: 100%;
-  background-color: transparent;
-  border-radius: 4px;
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.1);
+.clickthrough {
+  .clickthrough-button {
+    .icon {
+      width: 20px;
+      height: 20px;
+
+      & + * {
+        margin-left: 4px;
+      }
+    }
+
+    &.on {
+      .icon {
+        color: #f56c6c;
+      }
+    }
+
+    &.off {
+      .icon {
+        color: #67c23a;
+      }
+    }
   }
-  &:active {
-    background-color: rgba(0, 0, 0, 0.2);
-  }
-  .link-aspect-icon {
-    color: rgba(0, 0, 0, 0.4);
+  .state {
+    display: inline-block;
+    margin-left: 4px;
     width: 24px;
-    height: 24px;
+    font-weight: bold;
+
+    &.on {
+      color: #f56c6c;
+    }
+
+    &.off {
+      color: #67c23a;
+    }
   }
+}
+.opacity-slider {
+  width: 160px;
 }
 </style>

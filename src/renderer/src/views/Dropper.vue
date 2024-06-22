@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { onMounted, reactive } from 'vue';
-import { useRouter } from 'vue-router';
+import { onMounted, reactive, render } from "vue";
+import { useRouter } from "vue-router";
 
 const router = useRouter();
 
@@ -25,19 +25,19 @@ const onChangeFile = (e: any) => {
 const sendFile = (file: File) => {
   const reader = new FileReader();
   reader.onload = () => {
-    window.ipc.send('set-image', { type: 'data', data: reader.result });
+    window.ipc.send("set-image", { type: "data", data: reader.result });
   };
   reader.readAsDataURL(file);
 };
 const fromClipboard = () => {
-  window.ipc.send('set-image', { type: 'clipboard' });
+  window.ipc.send("set-image", { type: "clipboard" });
 };
 const goToController = () => {
-  router.push('/controller');
+  router.push("/controller");
 };
 
 onMounted(() => {
-  window.ipc.on('goto-controller', () => {
+  window.ipc.on("goto-controller", () => {
     goToController();
   });
 });
@@ -73,29 +73,27 @@ onMounted(() => {
   padding: 16px;
   width: 100%;
   height: 100%;
-  border: 1px solid #ddd;
   .drag-area {
     display: flex;
     flex-direction: column;
     justify-content: center;
     height: 100%;
     text-align: center;
-    border: 2px dotted rgba(0, 0, 0, 0.16);
+    border: 2px dotted rgba(255, 255, 255, 0.16);
     border-radius: 8px;
     &.on-dragover {
-      border: 2px dotted rgba(0, 0, 0, 0.48);
+      border: 2px dotted rgba(255, 255, 255, 0.48);
     }
   }
   .drop-text {
     display: block;
-    margin-top: 32px;
-    font-size: 20px;
-    color: rgba(0, 0, 0, 0.48);
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.48);
   }
   .or-text {
     display: block;
-    margin-top: 16px;
-    color: rgba(0, 0, 0, 0.4);
+    margin-top: 8px;
+    color: rgba(255, 255, 255, 0.4);
   }
   .file-button,
   .clipboard-button {
@@ -106,7 +104,7 @@ onMounted(() => {
     margin: 0 auto;
     width: 160px;
     height: 40px;
-    border: 1px solid rgba(0, 0, 0, 0.24);
+    border: 1px solid rgba(255, 255, 255, 0.24);
     border-radius: 4px;
     font-size: 14px;
     line-height: 16px;
@@ -114,7 +112,7 @@ onMounted(() => {
     color: hsl(0, 0%, 60%);
     cursor: pointer;
     &:hover {
-      border: 1px solid rgba(0, 0, 0, 0.54);
+      border: 1px solid rgba(255, 255, 255, 0.54);
     }
   }
   .file-button {

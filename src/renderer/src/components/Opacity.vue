@@ -1,15 +1,15 @@
 <script lang="ts" setup>
-import { reactive } from 'vue';
+import { reactive } from "vue";
 
 const emit = defineEmits<{
-  (e: 'change', opacity: number): void;
+  (e: "change", opacity: number): void;
 }>();
 
 const state = reactive({
   opacity: 100,
 });
 const onChange = () => {
-  emit('change', Number(state.opacity));
+  emit("change", Number(state.opacity));
 };
 </script>
 <template>
