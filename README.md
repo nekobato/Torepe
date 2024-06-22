@@ -1,18 +1,16 @@
 # Torepe
 
-Torepe: Support design implemetation with overlay comparison, like digital tracing paper.
+Torepe: クリップボードやファイルからスクリーン上に画像を固定して表示するためのデスクトップアプリケーションです。実装とデザインを重ねて比較したい時に。
 
 <p>
   <img alt="Version" src="https://img.shields.io/github/package-json/v/nekobato/torepe">
-  <a href="https://twitter.com/nekobato" target="_blank">
-    <img alt="Twitter" src="https://img.shields.io/twitter/follow/nekobato?style=flat-square">
-  </a>
 </p>
 
 ## Screenshots
 
-![image](https://user-images.githubusercontent.com/861170/94355771-fab84300-00c1-11eb-8d00-2d1d841a4c52.png)
-![image](https://user-images.githubusercontent.com/861170/94355776-0441ab00-00c2-11eb-8507-b815f6d5f20b.png)
+![Screenshot1 - Torepe](https://github.com/nekobato/Torepe/assets/861170/056aa4d8-ec72-4b0e-9cc1-9719659625fe)
+![Screenshot2 - Torepe](https://github.com/nekobato/Torepe/assets/861170/3bdd5796-e795-4d91-8d9f-c83c3d1a32ae)
+
 
 ## Author
 
