@@ -44,7 +44,6 @@ function createWindow() {
     resizable: false,
     webPreferences: {
       preload: preload,
-      nodeIntegration: true,
     },
   });
 
@@ -57,8 +56,8 @@ function createWindow() {
     roundedCorners: false,
     webPreferences: {
       preload: preload,
-      nodeIntegration: true,
     },
+    alwaysOnTop: true,
     show: false,
   });
 
@@ -130,6 +129,7 @@ function createWindow() {
           payload.data = image.toDataURL();
         }
 
+        paperWindow.center();
         paperWindow.show();
         paperWindow.webContents.send(event, payload);
 

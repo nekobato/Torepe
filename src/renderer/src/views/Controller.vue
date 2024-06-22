@@ -136,6 +136,15 @@ window.ipc.on("window-rectangle", (_, { x, y, width, height, original }) => {
         <Icon icon="mingcute:unlink-2-line" class="link-aspect-icon" v-else />
       </ElButton>
     </div>
+    <div class="opacity">
+      <label>OPACITY</label>
+      <ElSlider
+        v-model="state.opacity"
+        :min="1"
+        :max="100"
+        class="opacity-slider"
+      />
+    </div>
     <div class="clickthrough">
       <ElButton
         v-model="state.clickThrough"
@@ -155,19 +164,10 @@ window.ipc.on("window-rectangle", (_, { x, y, width, height, original }) => {
           v-if="state.clickThrough"
         />
         <Icon icon="mingcute:ghost-line" class="icon" v-else />
-        <span>Ignore Mouse is</span>
+        <span>IgnoreMouse is</span>
         <span class="state on" v-if="state.clickThrough">ON</span>
         <span class="state off" v-else>OFF</span>
       </ElButton>
-    </div>
-    <div class="opacity">
-      <label>Opacity</label>
-      <ElSlider
-        v-model="state.opacity"
-        :min="1"
-        :max="100"
-        class="opacity-slider"
-      />
     </div>
   </div>
 </template>
@@ -281,7 +281,14 @@ window.ipc.on("window-rectangle", (_, { x, y, width, height, original }) => {
     }
   }
 }
-.opacity-slider {
-  width: 160px;
+.opacity {
+  label {
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  .opacity-slider {
+    width: 160px;
+  }
 }
 </style>
