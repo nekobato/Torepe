@@ -34,8 +34,8 @@ importers:
         specifier: ^2.0.1
         version: 2.0.1
       electron-log:
-        specifier: ^5.1.5
-        version: 5.1.5
+        specifier: ^5.1.7
+        version: 5.1.7
       electron-updater:
         specifier: ^6.2.1
         version: 6.2.1
@@ -1241,8 +1241,8 @@ packages:
     engines: {node: '>= 10.0.0'}
     hasBin: true
 
-  electron-log@5.1.5:
-    resolution: {integrity: sha512-vuq10faUAxRbILgQx7yHoMObKZDEfj7hMSZrJPsVrDNeCpV/HN11dU7QuY4UDUe055pzBxhSCB3m0+6D3Aktjw==}
+  electron-log@5.1.7:
+    resolution: {integrity: sha512-/PjrS9zGkrZCDTHt6IgNE3FeciBbi4wd7U76NG9jAoNXF99E9IJdvBkqvaUJ1NjLojYDKs0kTvn9YhKy1/Zi+Q==}
     engines: {node: '>= 14'}
 
   electron-publish@24.13.1:
@@ -4033,7 +4033,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  electron-log@5.1.5: {}
+  electron-log@5.1.7: {}
 
   electron-publish@24.13.1:
     dependencies:
