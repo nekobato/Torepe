@@ -10,7 +10,9 @@ import {
 import { release } from "os";
 import log from "electron-log";
 import { checkUpdate } from "./autoupdater";
-import { pageRoot, preload } from "./static";
+import { createWindow as createControllerWindow } from "./controllerWindow";
+import { createWindow as createPaperWindow } from "./paperWindow";
+
 const isDevelopment = process.env.NODE_ENV === "development";
 
 // Disable GPU Acceleration for Windows 7
@@ -37,43 +39,8 @@ const menu = Menu.buildFromTemplate([{ role: "appMenu" }]);
 Menu.setApplicationMenu(menu);
 
 function createWindow() {
-  controllerWindow = new BrowserWindow({
-    title: "Torepe",
-    width: 240,
-    height: 240,
-    resizable: false,
-    webPreferences: {
-      preload: preload,
-    },
-  });
-
-  paperWindow = new BrowserWindow({
-    title: "Torepe",
-    frame: false,
-    hasShadow: false,
-    transparent: true,
-    resizable: true,
-    roundedCorners: false,
-    webPreferences: {
-      preload: preload,
-    },
-    alwaysOnTop: true,
-    show: false,
-  });
-
-  if (isDevelopment) {
-    controllerWindow.loadURL(pageRoot + "#/dropper");
-    paperWindow.loadURL(pageRoot + "#/paper");
-    controllerWindow.webContents.openDevTools();
-    paperWindow.webContents.openDevTools();
-  } else {
-    controllerWindow.loadFile(pageRoot, { hash: "/dropper" });
-    paperWindow.loadFile(pageRoot, { hash: "/paper" });
-  }
-
-  controllerWindow.on("closed", () => {
-    controllerWindow = null;
-  });
+  controllerWindow = createControllerWindow();
+  paperWindow = createPaperWindow();
 
   paperWindow.on("moved", () => {
     if (!controllerWindow || !paperWindow) return;
@@ -155,14 +122,14 @@ function createWindow() {
         } else {
           paperWindow.setAspectRatio(0);
         }
+        break;
+      case "close":
+        paperWindow.hide();
+        break;
       case "error":
         log.error(payload);
         break;
     }
-  });
-
-  controllerWindow.on("closed", () => {
-    app.quit();
   });
 }
 

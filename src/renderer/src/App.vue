@@ -4,7 +4,6 @@ import { RouterView } from "vue-router";
 
 <template>
   <RouterView />
-  hogehoge
 </template>
 
 <style>

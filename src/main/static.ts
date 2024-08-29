@@ -1,6 +1,7 @@
 import { app } from "electron";
 import path from "node:path";
 
+export const isDevelopment = process.env.NODE_ENV === "development";
 export const root = path.join(__dirname, "..");
 
 export const mainRoot = path.join(__dirname, "../main");
