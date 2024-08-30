@@ -3,6 +3,8 @@ import { isDevelopment, pageRoot, preload } from "./static";
 
 export const createWindow = () => {
   const paperWindow = new BrowserWindow({
+    width: 240,
+    height: 240,
     title: "Torepe",
     frame: false,
     hasShadow: false,
@@ -20,10 +22,10 @@ export const createWindow = () => {
   });
 
   if (isDevelopment) {
-    paperWindow.loadURL(pageRoot + "#/paper");
+    paperWindow.loadURL(pageRoot + "#/dropper");
     paperWindow.webContents.openDevTools();
   } else {
-    paperWindow.loadFile(pageRoot, { hash: "/paper" });
+    paperWindow.loadFile(pageRoot, { hash: "/dropper" });
   }
 
   return paperWindow;

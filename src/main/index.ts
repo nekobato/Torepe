@@ -10,7 +10,6 @@ import {
 import { release } from "os";
 import log from "electron-log";
 import { checkUpdate } from "./autoupdater";
-import { createWindow as createControllerWindow } from "./controllerWindow";
 import { createWindow as createPaperWindow } from "./paperWindow";
 
 const isDevelopment = process.env.NODE_ENV === "development";
@@ -26,8 +25,7 @@ if (!app.requestSingleInstanceLock()) {
   process.exit(0);
 }
 
-let controllerWindow: BrowserWindow | null;
-let paperWindow: BrowserWindow | null;
+let paperWindows: BrowserWindow[] = [];
 
 protocol.registerSchemesAsPrivileged([
   { scheme: "app", privileges: { secure: true, standard: true } },
@@ -38,45 +36,23 @@ checkUpdate();
 const menu = Menu.buildFromTemplate([{ role: "appMenu" }]);
 Menu.setApplicationMenu(menu);
 
-function createWindow() {
-  controllerWindow = createControllerWindow();
-  paperWindow = createPaperWindow();
-
-  paperWindow.on("moved", () => {
-    if (!controllerWindow || !paperWindow) return;
-    controllerWindow.webContents.send("window-rectangle", {
-      ...paperWindow.getBounds(),
-      original: false,
-    });
-  });
-
-  paperWindow.on("will-resize", (_, rectangle) => {
-    if (!controllerWindow) return;
-    controllerWindow.webContents.send("window-rectangle", {
-      ...rectangle,
-      original: false,
-    });
-  });
-
+function initEvents() {
   ipcMain.on("renderer-event", (_, event: string, payload: any) => {
-    if (!paperWindow || !controllerWindow) return;
+    if (paperWindows.length === 0) return;
     switch (event) {
-      case "set-opacity":
-        paperWindow.webContents.send(event, payload);
-        break;
       case "toggle-clickthrough":
-        paperWindow.setIgnoreMouseEvents(payload.toggle);
-        paperWindow.setAlwaysOnTop(payload.toggle);
+        paperWindows[payload.windowIndex].setIgnoreMouseEvents(payload.toggle);
+        paperWindows[payload.windowIndex].setAlwaysOnTop(payload.toggle);
         break;
       case "set-bounds":
-        paperWindow.setBounds(payload);
+        paperWindows[payload.windowIndex].setBounds(payload);
         break;
       case "set-position":
-        paperWindow.setBounds(payload);
+        paperWindows[payload.windowIndex].setBounds(payload);
         break;
       case "move-position":
-        const bounds = paperWindow.getBounds();
-        paperWindow.setBounds({
+        const bounds = paperWindows[payload.windowIndex].getBounds();
+        paperWindows[payload.windowIndex].setBounds({
           ...bounds,
           x: bounds.x + payload.x,
           y: bounds.y + payload.y,
@@ -96,35 +72,26 @@ function createWindow() {
           payload.data = image.toDataURL();
         }
 
-        paperWindow.center();
-        paperWindow.show();
-        paperWindow.webContents.send(event, payload);
-
-        controllerWindow.webContents?.send("goto-controller");
+        paperWindows[payload.windowIndex].center();
+        paperWindows[payload.windowIndex].show();
+        paperWindows[payload.windowIndex].webContents.send(event, payload);
         break;
       case "set-image-size":
-        paperWindow.setSize(payload.width, payload.height);
-        controllerWindow.webContents.send("window-rectangle", {
-          x: paperWindow.getBounds().x,
-          y: paperWindow.getBounds().y,
-          width: payload.width,
-          height: payload.height,
-          original: true,
-        });
-        break;
-      case "reset-image":
-        paperWindow.hide();
+        paperWindows[payload.windowIndex].setSize(
+          payload.width,
+          payload.height
+        );
         break;
       case "link-aspect":
         const { link, ratio } = payload;
         if (link) {
-          paperWindow.setAspectRatio(ratio);
+          paperWindows[payload.windowIndex].setAspectRatio(ratio);
         } else {
-          paperWindow.setAspectRatio(0);
+          paperWindows[payload.windowIndex].setAspectRatio(0);
         }
         break;
       case "close":
-        paperWindow.hide();
+        paperWindows[payload.windowIndex].close();
         break;
       case "error":
         log.error(payload);
@@ -133,18 +100,24 @@ function createWindow() {
   });
 }
 
+function addPaperWindow() {
+  const paperWindow = createPaperWindow();
+  paperWindows?.push(paperWindow);
+}
+
 app.on("window-all-closed", () => {
   app.quit();
 });
 
 app.on("activate", () => {
-  if (controllerWindow === null) {
-    createWindow();
+  if (paperWindows.length === 0) {
+    addPaperWindow();
   }
 });
 
 app.on("ready", async () => {
-  createWindow();
+  initEvents();
+  addPaperWindow();
 });
 
 if (isDevelopment) {
