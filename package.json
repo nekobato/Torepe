@@ -31,7 +31,7 @@
     "electron-builder": "^24.13.3",
     "electron-icon-builder": "^2.0.1",
     "electron-log": "^5.1.7",
-    "electron-updater": "^6.3.4",
+    "electron-updater": "^6.3.9",
     "electron-vite": "^2.3.0",
     "element-plus": "^2.8.4",
     "prettier": "^3.3.3",
