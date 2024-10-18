@@ -16,5 +16,12 @@ export default defineConfig({
         "@": resolve("src/renderer/src"),
       },
     },
+    css: {
+      preprocessorOptions: {
+        scss: {
+          api: "modern-compiler",
+        },
+      },
+    },
   },
 });
