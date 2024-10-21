@@ -33,7 +33,7 @@
     "electron-log": "^5.2.0",
     "electron-updater": "^6.3.9",
     "electron-vite": "^2.3.0",
-    "element-plus": "^2.8.5",
+    "element-plus": "^2.8.6",
     "prettier": "^3.3.3",
     "sass": "^1.80.2",
     "typescript": "^5.6.3",
