@@ -43,8 +43,8 @@ importers:
         specifier: ^2.3.0
         version: 2.3.0(vite@5.4.9(@types/node@22.7.6)(sass@1.80.6))
       element-plus:
-        specifier: ^2.8.5
-        version: 2.8.5(vue@3.5.12(typescript@5.6.3))
+        specifier: ^2.8.7
+        version: 2.8.7(vue@3.5.12(typescript@5.6.3))
       prettier:
         specifier: ^3.3.3
         version: 3.3.3
@@ -1401,8 +1401,8 @@ packages:
     engines: {node: '>= 12.20.55'}
     hasBin: true
 
-  element-plus@2.8.5:
-    resolution: {integrity: sha512-Px+kPbRTVvn5oa5+9saa7QEOnUweKXm0JVI7yJHzKF/doQGixwcFMsQEF2+3Fy62EA/7dRRKVuhsNGGZYNk3cw==}
+  element-plus@2.8.7:
+    resolution: {integrity: sha512-oGQyFRufFOgjd872tZc+T4xQAYLlX4hj6d3ixeY13L4fFNUuc1N49JHAqJGPda0tdx3qCnjceZoh1kqqj2+tXQ==}
     peerDependencies:
       vue: ^3.2.0
 
@@ -4553,7 +4553,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  element-plus@2.8.5(vue@3.5.12(typescript@5.6.3)):
+  element-plus@2.8.7(vue@3.5.12(typescript@5.6.3)):
     dependencies:
       '@ctrl/tinycolor': 3.6.1
       '@element-plus/icons-vue': 2.3.1(vue@3.5.12(typescript@5.6.3))
