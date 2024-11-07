@@ -42,7 +42,7 @@
     "vite-plugin-electron-renderer": "^0.14.6",
     "vue": "^3.5.12",
     "vue-router": "^4.4.5",
-    "vue-tsc": "^2.1.6"
+    "vue-tsc": "^2.1.10"
   },
   "dependencies": {
     "png-dpi-reader-writer": "^0.2.4"
