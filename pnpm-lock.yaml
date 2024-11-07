@@ -25,8 +25,8 @@ importers:
         specifier: ^16.4.5
         version: 16.4.5
       electron:
-        specifier: 33.0.1
-        version: 33.0.1
+        specifier: 33.0.2
+        version: 33.0.2
       electron-builder:
         specifier: ^25.1.8
         version: 25.1.8(electron-builder-squirrel-windows@25.1.8(dmg-builder@25.1.8))
@@ -1396,8 +1396,8 @@ packages:
       '@swc/core':
         optional: true
 
-  electron@33.0.1:
-    resolution: {integrity: sha512-PipPnWH4gvf7o+P8jlKQZGgPfb5eHcLgTrnKkFzb98MXhyPjVJYCR7YWqcawZ8IfyJCut8vMxLuBFLT1Ag8TSQ==}
+  electron@33.0.2:
+    resolution: {integrity: sha512-C2WksfP0COsMHbYXSJG68j6S3TjuGDrw/YT42B526yXalIlNQZ2GeAYKryg6AEMkIp3p8TUfDRD0+HyiyCt/nw==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
 
@@ -3735,7 +3735,7 @@ snapshots:
     dependencies:
       '@types/http-cache-semantics': 4.0.4
       '@types/keyv': 3.1.4
-      '@types/node': 20.16.12
+      '@types/node': 22.7.6
       '@types/responselike': 1.0.3
 
   '@types/debug@4.1.12':
@@ -3757,7 +3757,7 @@ snapshots:
 
   '@types/keyv@3.1.4':
     dependencies:
-      '@types/node': 20.16.12
+      '@types/node': 22.7.6
 
   '@types/lodash-es@4.17.12':
     dependencies:
@@ -3787,7 +3787,7 @@ snapshots:
 
   '@types/responselike@1.0.3':
     dependencies:
-      '@types/node': 20.16.12
+      '@types/node': 22.7.6
 
   '@types/verror@1.10.10':
     optional: true
@@ -3796,7 +3796,7 @@ snapshots:
 
   '@types/yauzl@2.10.3':
     dependencies:
-      '@types/node': 20.16.12
+      '@types/node': 22.7.6
     optional: true
 
   '@vitejs/plugin-vue@5.1.4(vite@5.4.9(@types/node@22.7.6)(sass@1.80.6))(vue@3.5.12(typescript@5.6.3))':
@@ -4545,7 +4545,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  electron@33.0.1:
+  electron@33.0.2:
     dependencies:
       '@electron/get': 2.0.3
       '@types/node': 20.16.12
