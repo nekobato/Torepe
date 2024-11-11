@@ -25,8 +25,8 @@ importers:
         specifier: ^16.4.5
         version: 16.4.5
       electron:
-        specifier: 33.0.2
-        version: 33.0.2
+        specifier: 33.2.0
+        version: 33.2.0
       electron-builder:
         specifier: ^25.1.8
         version: 25.1.8(electron-builder-squirrel-windows@25.1.8(dmg-builder@25.1.8))
@@ -1396,8 +1396,8 @@ packages:
       '@swc/core':
         optional: true
 
-  electron@33.0.2:
-    resolution: {integrity: sha512-C2WksfP0COsMHbYXSJG68j6S3TjuGDrw/YT42B526yXalIlNQZ2GeAYKryg6AEMkIp3p8TUfDRD0+HyiyCt/nw==}
+  electron@33.2.0:
+    resolution: {integrity: sha512-PVw1ICAQDPsnnsmpNFX/b1i/49h67pbSPxuIENd9K9WpGO1tsRaQt+K2bmXqTuoMJsbzIc75Ce8zqtuwBPqawA==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
 
@@ -4545,7 +4545,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  electron@33.0.2:
+  electron@33.2.0:
     dependencies:
       '@electron/get': 2.0.3
       '@types/node': 20.16.12
