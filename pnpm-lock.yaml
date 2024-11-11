@@ -19,8 +19,8 @@ importers:
         specifier: ^4.1.2
         version: 4.1.2(vue@3.5.12(typescript@5.6.3))
       '@vitejs/plugin-vue':
-        specifier: ^5.1.4
-        version: 5.1.4(vite@5.4.9(@types/node@22.7.6)(sass@1.80.6))(vue@3.5.12(typescript@5.6.3))
+        specifier: ^5.1.5
+        version: 5.1.5(vite@5.4.9(@types/node@22.7.6)(sass@1.80.6))(vue@3.5.12(typescript@5.6.3))
       dotenv:
         specifier: ^16.4.5
         version: 16.4.5
@@ -816,8 +816,8 @@ packages:
   '@types/yauzl@2.10.3':
     resolution: {integrity: sha512-oJoftv0LSuaDZE3Le4DbKX+KS9G36NzOeSap90UIK0yMA/NhKJhqlSGtNDORNRaIbQfzjXDrQa0ytJ6mNRGz/Q==}
 
-  '@vitejs/plugin-vue@5.1.4':
-    resolution: {integrity: sha512-N2XSI2n3sQqp5w7Y/AN/L2XDjBIRGqXko+eDp42sydYSBeJuSm5a1sLf8zakmo8u7tA8NmBgoDLA1HeOESjp9A==}
+  '@vitejs/plugin-vue@5.1.5':
+    resolution: {integrity: sha512-dlnib73G05CDBAUR/YpuZcQQ47fpjihnnNouAAqN62z+oqSsWJ+kh52GRzIxpkgFG3q11eXK7Di7RMmoCwISZA==}
     engines: {node: ^18.0.0 || >=20.0.0}
     peerDependencies:
       vite: ^5.0.0
@@ -3799,7 +3799,7 @@ snapshots:
       '@types/node': 22.7.6
     optional: true
 
-  '@vitejs/plugin-vue@5.1.4(vite@5.4.9(@types/node@22.7.6)(sass@1.80.6))(vue@3.5.12(typescript@5.6.3))':
+  '@vitejs/plugin-vue@5.1.5(vite@5.4.9(@types/node@22.7.6)(sass@1.80.6))(vue@3.5.12(typescript@5.6.3))':
     dependencies:
       vite: 5.4.9(@types/node@22.7.6)(sass@1.80.6)
       vue: 3.5.12(typescript@5.6.3)
