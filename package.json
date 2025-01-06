@@ -24,7 +24,7 @@
   "main": "out/main/index.js",
   "devDependencies": {
     "@electron/notarize": "^2.5.0",
-    "@iconify/vue": "^4.2.0",
+    "@iconify/vue": "^4.3.0",
     "@vitejs/plugin-vue": "^5.2.1",
     "dotenv": "^16.4.7",
     "electron": "33.2.1",
