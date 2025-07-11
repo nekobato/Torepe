@@ -7,14 +7,7 @@
 
 <script lang="ts" setup>
 import { parsePngFormat } from "png-dpi-reader-writer";
-import {
-  computed,
-  nextTick,
-  onBeforeUnmount,
-  onMounted,
-  reactive,
-  ref,
-} from "vue";
+import { computed, onBeforeUnmount, onMounted, reactive, ref } from "vue";
 
 const state = reactive({ src: "", opacity: 100 });
 const image = ref<HTMLImageElement | null>(null);
@@ -43,7 +36,8 @@ const onLoad = (e: Event) => {
   const imageElement = e.currentTarget as HTMLImageElement;
 
   const arrayBuffer = dataUrlToArrayBuffer(state.src);
-  const { width, height, dpi } = parsePngFormat(arrayBuffer);
+  const buffer = Buffer.from(arrayBuffer);
+  const { width, height, dpi } = parsePngFormat(buffer);
 
   const per = dpi ? dpi / 72 : window.devicePixelRatio;
 

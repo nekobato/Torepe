@@ -1,8 +1,13 @@
 <script lang="ts" setup>
-import { onMounted, reactive, render } from "vue";
-import { useRouter } from "vue-router";
+import { onMounted, reactive, onUnmounted } from "vue";
+import { useWindowsStore } from "../stores/windows";
 
-const router = useRouter();
+interface Props {
+  windowId: string;
+}
+
+const props = defineProps<Props>();
+const windowsStore = useWindowsStore();
 
 const state = reactive({ isDragOver: false });
 
@@ -22,24 +27,70 @@ const onDragLeave = () => {
 const onChangeFile = (e: any) => {
   sendFile(e.target.files[0]);
 };
-const sendFile = (file: File) => {
+const sendFile = async (file: File) => {
   const reader = new FileReader();
-  reader.onload = () => {
-    window.ipc.send("set-image", { type: "data", data: reader.result });
+  reader.onload = async () => {
+    // Create paper window if it doesn't exist
+    const isLocalTab = !windowsStore.windowsList.find(
+      (w) => w.id === props.windowId
+    );
+    let targetWindowId = props.windowId;
+
+    if (isLocalTab) {
+      // Create paper window and get its ID
+      const newWindowId = await window.ipc.invoke(
+        "create-paper-window-with-id",
+        props.windowId
+      );
+      targetWindowId = newWindowId;
+    }
+
+    window.ipc.send("set-image", {
+      type: "data",
+      data: reader.result,
+      windowId: targetWindowId,
+    });
   };
   reader.readAsDataURL(file);
 };
-const fromClipboard = () => {
-  window.ipc.send("set-image", { type: "clipboard" });
+const fromClipboard = async () => {
+  // Create paper window if it doesn't exist
+  const isLocalTab = !windowsStore.windowsList.find(
+    (w) => w.id === props.windowId
+  );
+  let targetWindowId = props.windowId;
+
+  if (isLocalTab) {
+    // Create paper window and get its ID
+    const newWindowId = await window.ipc.invoke(
+      "create-paper-window-with-id",
+      props.windowId
+    );
+    targetWindowId = newWindowId;
+  }
+
+  window.ipc.send("set-image", {
+    type: "clipboard",
+    windowId: targetWindowId,
+  });
 };
-const goToController = () => {
-  router.push("/controller");
+
+const handleGotoController = (event: any, payload: any) => {
+  if (payload.windowId === props.windowId) {
+    // Update window state to show it has an image
+    windowsStore.updateWindow(props.windowId, {
+      imageData: {
+        path: "",
+        dataUrl: "",
+        width: 0,
+        height: 0,
+      },
+    });
+  }
 };
 
 onMounted(() => {
-  window.ipc.on("goto-controller", () => {
-    goToController();
-  });
+  window.ipc.on("goto-controller", handleGotoController);
 });
 </script>
 <template>

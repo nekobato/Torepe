@@ -33,7 +33,7 @@
     "electron-log": "^5.4.1",
     "electron-updater": "^6.6.2",
     "electron-vite": "^4.0.0",
-    "element-plus": "^2.10.3",
+    "pinia": "^3.0.3",
     "prettier": "^3.6.2",
     "sass-embedded": "^1.89.2",
     "typescript": "^5.8.3",
@@ -45,6 +45,9 @@
     "vue-tsc": "^3.0.1"
   },
   "dependencies": {
-    "png-dpi-reader-writer": "^0.2.4"
+    "@primevue/themes": "^4.3.6",
+    "png-dpi-reader-writer": "^0.2.4",
+    "primeicons": "^7.0.0",
+    "primevue": "^4.3.6"
   }
 }

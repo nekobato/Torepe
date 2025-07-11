@@ -1,9 +1,25 @@
 import { createApp } from "vue";
+import { createPinia } from "pinia";
+import PrimeVue from "primevue/config";
+import Aura from "@primevue/themes/aura";
 import router from "./router";
 import App from "./App.vue";
 import "@/styles/reset.css";
-import "element-plus/dist/index.css";
-import "element-plus/theme-chalk/dark/css-vars.css";
 import "@/styles/fonts.css";
+import "primeicons/primeicons.css";
 
-createApp(App).use(router).mount("#app").$nextTick(window.removeLoading);
+const app = createApp(App);
+const pinia = createPinia();
+
+app.use(pinia)
+   .use(router)
+   .use(PrimeVue, {
+     theme: {
+       preset: Aura,
+       options: {
+         darkModeSelector: 'system',
+         cssLayer: false
+       }
+     }
+   })
+   .mount("#app").$nextTick(window.removeLoading);

@@ -1,10 +1,19 @@
 <script lang="ts" setup>
-import { reactive, watch } from "vue";
-import { useRouter } from "vue-router";
+import { reactive, watch, onMounted, onUnmounted } from "vue";
 import { Icon } from "@iconify/vue";
-import { ElButton, ElSlider, ElInputNumber } from "element-plus";
+import Button from "primevue/button";
+import Slider from "primevue/slider";
+import InputNumber from "primevue/inputnumber";
+import { useWindowsStore } from "../stores/windows";
+import type { PaperWindowState } from "../../../shared/types/window";
 
-const router = useRouter();
+interface Props {
+  windowId: string;
+  windowData: PaperWindowState;
+}
+
+const props = defineProps<Props>();
+const windowsStore = useWindowsStore();
 
 const state = reactive({
   clickThrough: false,
@@ -25,7 +34,10 @@ const state = reactive({
 });
 
 const toggleClickThrough = () => {
-  window.ipc.send("toggle-clickthrough", { toggle: !state.clickThrough });
+  window.ipc.send("toggle-clickthrough", {
+    toggle: !state.clickThrough,
+    windowId: props.windowId,
+  });
   state.clickThrough = !state.clickThrough;
 };
 const onChangeWidth = (newWidth?: number) => {
@@ -41,6 +53,7 @@ const onChangeWidth = (newWidth?: number) => {
   window.ipc.send("set-bounds", {
     width: Number(state.windowSize.width),
     height: Number(state.windowSize.height),
+    windowId: props.windowId,
   });
 };
 const onChangeHeight = (newHeight?: number) => {
@@ -54,50 +67,91 @@ const onChangeHeight = (newHeight?: number) => {
   window.ipc.send("set-bounds", {
     width: Number(state.windowSize.width),
     height: Number(state.windowSize.height),
+    windowId: props.windowId,
   });
 };
 
 const resetImage = () => {
-  window.ipc.send("reset-image");
-  router.push("/dropper");
+  window.ipc.send("reset-image", { windowId: props.windowId });
+  windowsStore.updateWindow(props.windowId, { imageData: undefined });
+};
+
+const closeWindow = () => {
+  window.ipc.invoke("close-paper-window", props.windowId);
 };
 const linkAspect = () => {
   state.aspectLink = !state.aspectLink;
   window.ipc.send("link-aspect", {
     link: state.aspectLink,
     ratio: state.windowSize.width / state.windowSize.height,
+    windowId: props.windowId,
   });
 };
 
 watch(
   () => state.opacity,
   (newOpacity) => {
-    window.ipc.send("set-opacity", { opacity: newOpacity });
+    window.ipc.send("set-opacity", {
+      opacity: newOpacity,
+      windowId: props.windowId,
+    });
   }
 );
 
-window.ipc.on("window-rectangle", (_, { x, y, width, height, original }) => {
-  state.windowPosition = {
-    x,
-    y,
-  };
-  state.windowSize = {
-    width,
-    height,
-  };
-  if (original) {
-    state.imageSize = {
-      width,
-      height,
-    };
+const handleWindowRectangle = (event: any, payload: any) => {
+  if (payload.windowId === props.windowId) {
+    const { x, y, width, height, original } = payload;
+    state.windowPosition = { x, y };
+    state.windowSize = { width, height };
+    if (original) {
+      state.imageSize = { width, height };
+    }
   }
+};
+
+onMounted(() => {
+  // Initialize state from window data
+  if (props.windowData) {
+    state.windowPosition = {
+      x: props.windowData.bounds.x,
+      y: props.windowData.bounds.y,
+    };
+    state.windowSize = {
+      width: props.windowData.bounds.width,
+      height: props.windowData.bounds.height,
+    };
+    state.opacity = props.windowData.opacity * 100;
+    state.clickThrough = props.windowData.clickThrough;
+
+    if (props.windowData.imageData) {
+      state.imageSize = {
+        width: props.windowData.imageData.width,
+        height: props.windowData.imageData.height,
+      };
+    }
+  }
+
+  window.ipc.on("window-rectangle", handleWindowRectangle);
+});
+
+onUnmounted(() => {
+  window.ipc.removeAllListeners("window-rectangle");
 });
 </script>
 <template>
   <div class="controller">
-    <ElButton class="reset" @click="resetImage">
+    <Button class="reset" @click="resetImage" text>
       <Icon class="icon" icon="mingcute:arrow-left-line" />
-    </ElButton>
+    </Button>
+    <Button
+      class="close"
+      @click="closeWindow"
+      severity="danger"
+      size="small"
+      text
+    >
+      <Icon class="icon" icon="mingcute:close-line" />
+    </Button>
     <div class="original-size-container">
       <span class="label">画像サイズ</span>
       <span class="size"
@@ -108,37 +162,37 @@ window.ipc.on("window-rectangle", (_, { x, y, width, height, original }) => {
       <div class="form-item-group">
         <div class="form-item">
           <label>Width</label>
-          <ElInputNumber
+          <InputNumber
             v-model="state.windowSize.width"
             :min="1"
             size="small"
             class="input"
-            @change="onChangeWidth"
+            @update:model-value="onChangeWidth"
           />
         </div>
         <div class="form-item">
           <label>Height</label>
-          <ElInputNumber
+          <InputNumber
             v-model="state.windowSize.height"
             :min="1"
             size="small"
             class="input"
-            @change="onChangeHeight"
+            @update:model-value="onChangeHeight"
           />
         </div>
       </div>
-      <ElButton class="link-aspect-button" @click="linkAspect" text circle>
+      <Button class="link-aspect-button" @click="linkAspect" text>
         <Icon
           icon="mingcute:link-2-line"
           class="link-aspect-icon"
           v-if="state.aspectLink"
         />
         <Icon icon="mingcute:unlink-2-line" class="link-aspect-icon" v-else />
-      </ElButton>
+      </Button>
     </div>
     <div class="opacity">
       <label>OPACITY</label>
-      <ElSlider
+      <Slider
         v-model="state.opacity"
         :min="1"
         :max="100"
@@ -146,10 +200,7 @@ window.ipc.on("window-rectangle", (_, { x, y, width, height, original }) => {
       />
     </div>
     <div class="clickthrough">
-      <ElButton
-        v-model="state.clickThrough"
-        :min="1"
-        :max="100"
+      <Button
         class="clickthrough-button"
         :class="{
           on: state.clickThrough,
@@ -167,7 +218,7 @@ window.ipc.on("window-rectangle", (_, { x, y, width, height, original }) => {
         <span>IgnoreMouse is</span>
         <span class="state on" v-if="state.clickThrough">ON</span>
         <span class="state off" v-else>OFF</span>
-      </ElButton>
+      </Button>
     </div>
   </div>
 </template>
@@ -207,6 +258,9 @@ window.ipc.on("window-rectangle", (_, { x, y, width, height, original }) => {
       .input {
         width: 100px;
       }
+      :deep(.p-inputnumber-input) {
+        width: 100px;
+      }
     }
   }
 
@@ -242,6 +296,15 @@ window.ipc.on("window-rectangle", (_, { x, y, width, height, original }) => {
   left: 8px;
   .icon + * {
     margin-left: 4px;
+  }
+}
+.close {
+  position: absolute;
+  top: 8px;
+  left: 48px;
+  .icon {
+    width: 16px;
+    height: 16px;
   }
 }
 .clickthrough {
@@ -289,6 +352,9 @@ window.ipc.on("window-rectangle", (_, { x, y, width, height, original }) => {
     text-transform: uppercase;
   }
   .opacity-slider {
+    width: 160px;
+  }
+  :deep(.p-slider) {
     width: 160px;
   }
 }

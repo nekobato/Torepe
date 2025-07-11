@@ -22,4 +22,11 @@ contextBridge.exposeInMainWorld("ipc", {
   ) {
     ipcRenderer.on(event, callback);
   },
+  // New methods for multi-window support
+  invoke(channel: string, ...args: any[]) {
+    return ipcRenderer.invoke(channel, ...args);
+  },
+  removeAllListeners(channel: string) {
+    ipcRenderer.removeAllListeners(channel);
+  },
 });

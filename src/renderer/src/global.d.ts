@@ -1,21 +1,29 @@
 export {};
 
+import type { PaperWindowState } from "../../shared/types/window";
+
 type EventMap = {
-  'set-opacity': {
+  "set-opacity": {
     opacity: number;
   };
-  'set-image': {
-    type: 'file' | 'clipboard';
+  "set-image": {
+    type: "file" | "clipboard";
     data: string;
   };
-  'goto-controller': void;
-  'window-rectangle': {
+  "goto-controller": {
+    windowId: string;
+  };
+  "window-rectangle": {
+    windowId: string;
     x: number;
     y: number;
     width: number;
     height: number;
     original: boolean;
   };
+  "paper-window-created": PaperWindowState;
+  "paper-window-closed": string; // windowId
+  "paper-window-focused": string; // windowId
 };
 
 declare global {
@@ -27,6 +35,8 @@ declare global {
         event: K,
         callback: (event: K, payload: EventMap[K]) => void
       ) => void;
+      invoke: (channel: string, ...args: any[]) => Promise<any>;
+      removeAllListeners: (channel: string) => void;
     };
     removeLoading: () => void;
   }
