@@ -169,11 +169,40 @@ const handlePaperWindowFocused = (_event: any, windowId: string) => {
   activeWindowId.value = windowId;
 };
 
-onMounted(() => {
+const handlePaperWindowImageUpdated = (
+  _event: any,
+  payload: { windowId: string; width: number; height: number }
+) => {
+  const existing = windowsStore.getWindow(payload.windowId);
+  if (!existing) return;
+
+  windowsStore.updateWindow(payload.windowId, {
+    imageData: {
+      ...(existing.imageData ?? {}),
+      width: payload.width,
+      height: payload.height,
+    },
+  });
+};
+
+onMounted(async () => {
+  try {
+    const windowsState = await window.ipc.invoke("get-windows-state");
+    windowsState.forEach((windowState: PaperWindowState) => {
+      windowsStore.addWindow(windowState);
+    });
+  } catch (error) {
+    console.error("Failed to initialize windows state:", error);
+  }
+
   // Set up IPC event listeners
   window.ipc.on("paper-window-created", handlePaperWindowCreated);
   window.ipc.on("paper-window-closed", handlePaperWindowClosed);
   window.ipc.on("paper-window-focused", handlePaperWindowFocused);
+  window.ipc.on(
+    "paper-window-image-updated",
+    handlePaperWindowImageUpdated
+  );
 
   // Set initial active tab
   if (windowsStore.activeWindowId) {
@@ -188,6 +217,7 @@ onUnmounted(() => {
   window.ipc.removeAllListeners("paper-window-created");
   window.ipc.removeAllListeners("paper-window-closed");
   window.ipc.removeAllListeners("paper-window-focused");
+  window.ipc.removeAllListeners("paper-window-image-updated");
 });
 </script>
 

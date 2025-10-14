@@ -36,3 +36,4 @@ electron-builder.env
 # CLAUDE
 .claude/
 prompts/
+AGENTS.md

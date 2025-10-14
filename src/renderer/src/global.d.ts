@@ -9,6 +9,7 @@ type EventMap = {
   "set-image": {
     type: "file" | "clipboard";
     data: string;
+    windowId?: string;
   };
   "goto-controller": {
     windowId: string;
@@ -24,6 +25,14 @@ type EventMap = {
   "paper-window-created": PaperWindowState;
   "paper-window-closed": string; // windowId
   "paper-window-focused": string; // windowId
+  "init-paper-window": {
+    windowId: string;
+  };
+  "paper-window-image-updated": {
+    windowId: string;
+    width: number;
+    height: number;
+  };
 };
 
 declare global {

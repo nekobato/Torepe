@@ -106,6 +106,23 @@ const handleWindowRectangle = (event: any, payload: any) => {
     if (original) {
       state.imageSize = { width, height };
     }
+
+    const existing = windowsStore.getWindow(props.windowId);
+    windowsStore.updateWindow(props.windowId, {
+      bounds: {
+        x,
+        y,
+        width,
+        height,
+      },
+      imageData: original
+        ? {
+            ...(existing?.imageData ?? {}),
+            width,
+            height,
+          }
+        : existing?.imageData,
+    });
   }
 };
 
@@ -140,9 +157,6 @@ onUnmounted(() => {
 </script>
 <template>
   <div class="controller">
-    <Button class="reset" @click="resetImage" text>
-      <Icon class="icon" icon="mingcute:arrow-left-line" />
-    </Button>
     <Button
       class="close"
       @click="closeWindow"
@@ -232,7 +246,6 @@ onUnmounted(() => {
   align-items: center;
   height: 100%;
   gap: 8px;
-  background-color: #252522;
 }
 .size-fields {
   margin-top: 52px;

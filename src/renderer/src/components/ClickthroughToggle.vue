@@ -4,11 +4,11 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'toggle'): void;
+  (e: "toggle"): void;
 }>();
 
 const toggleClickThrough = () => {
-  emit('toggle');
+  emit("toggle");
 };
 </script>
 <template>

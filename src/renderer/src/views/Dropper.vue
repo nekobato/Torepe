@@ -124,7 +124,6 @@ onMounted(() => {
   padding: 16px;
   width: 100%;
   height: 100%;
-  background-color: #252522;
   .drag-area {
     display: flex;
     flex-direction: column;

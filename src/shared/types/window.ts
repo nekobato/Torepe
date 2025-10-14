@@ -26,6 +26,6 @@ export interface WindowsStore {
 
 export interface WindowEvent {
   windowId: string;
-  type: 'focus' | 'blur' | 'close' | 'move' | 'resize';
+  type: "focus" | "blur" | "close" | "move" | "resize";
   payload?: any;
 }

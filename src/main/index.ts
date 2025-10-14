@@ -60,6 +60,11 @@ function createPaperWindow(): string {
 
   paperWindows.set(windowId, paperWindow);
 
+  paperWindow.webContents.once("did-finish-load", () => {
+    if (paperWindow.isDestroyed()) return;
+    paperWindow.webContents.send("init-paper-window", { windowId });
+  });
+
   if (isDevelopment) {
     paperWindow.loadURL(pageRoot + "#/paper");
     paperWindow.webContents.openDevTools();
@@ -162,6 +167,11 @@ function createWindow() {
 
     paperWindows.set(windowId, paperWindow);
 
+    paperWindow.webContents.once("did-finish-load", () => {
+      if (paperWindow.isDestroyed()) return;
+      paperWindow.webContents.send("init-paper-window", { windowId });
+    });
+
     if (isDevelopment) {
       paperWindow.loadURL(pageRoot + "#/paper");
       paperWindow.webContents.openDevTools();
@@ -206,7 +216,7 @@ function createWindow() {
       const windowState: PaperWindowState = {
         id: windowId,
         windowId: paperWindow.id,
-        title: `Window ${windowId.split('-')[1]}`,
+        title: `Window ${windowId.split("-")[1]}`,
         bounds: paperWindow.getBounds(),
         opacity: 1,
         clickThrough: false,
@@ -288,7 +298,7 @@ function createWindow() {
           });
         }
         break;
-      case "set-image":
+      case "set-image": {
         if (payload.type === "clipboard") {
           const image = clipboard.readImage();
           if (image.isEmpty()) {
@@ -302,25 +312,48 @@ function createWindow() {
           payload.data = image.toDataURL();
         }
 
-        if (paperWindow && !paperWindow.isDestroyed()) {
+        if (!paperWindow || paperWindow.isDestroyed()) {
+          break;
+        }
+
+        payload.windowId = windowId;
+
+        const sendToPaperWindow = () => {
+          if (paperWindow.isDestroyed()) return;
           paperWindow.center();
           paperWindow.show();
           paperWindow.webContents.send(event, payload);
+        };
+
+        if (paperWindow.webContents.isLoading()) {
+          paperWindow.webContents.once("did-finish-load", sendToPaperWindow);
+        } else {
+          sendToPaperWindow();
         }
 
-        controllerWindow.webContents?.send("goto-controller", { windowId });
+        if (windowId) {
+          controllerWindow.webContents?.send("goto-controller", { windowId });
+        }
         break;
+      }
       case "set-image-size":
         if (paperWindow && !paperWindow.isDestroyed()) {
           paperWindow.setSize(payload.width, payload.height);
-          controllerWindow.webContents.send("window-rectangle", {
-            windowId,
-            x: paperWindow.getBounds().x,
-            y: paperWindow.getBounds().y,
-            width: payload.width,
-            height: payload.height,
-            original: true,
-          });
+          if (controllerWindow && !controllerWindow.isDestroyed()) {
+            controllerWindow.webContents.send("paper-window-image-updated", {
+              windowId,
+              width: payload.width,
+              height: payload.height,
+            });
+            controllerWindow.webContents.send("window-rectangle", {
+              windowId,
+              x: paperWindow.getBounds().x,
+              y: paperWindow.getBounds().y,
+              width: payload.width,
+              height: payload.height,
+              original: true,
+            });
+          }
         }
         break;
       case "reset-image":

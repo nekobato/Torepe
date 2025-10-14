@@ -7,10 +7,13 @@
 
 <script lang="ts" setup>
 import { parsePngFormat } from "png-dpi-reader-writer";
-import { computed, onBeforeUnmount, onMounted, reactive, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, reactive } from "vue";
 
-const state = reactive({ src: "", opacity: 100 });
-const image = ref<HTMLImageElement | null>(null);
+const state = reactive({
+  src: "",
+  opacity: 100,
+  windowId: "",
+});
 
 const dataUrlToArrayBuffer = (dataUrl: string) => {
   const base64 = dataUrl.split(",")[1];
@@ -35,38 +38,58 @@ const setOpacity = (opacity: number) => {
 const onLoad = (e: Event) => {
   const imageElement = e.currentTarget as HTMLImageElement;
 
-  const arrayBuffer = dataUrlToArrayBuffer(state.src);
-  const buffer = Buffer.from(arrayBuffer);
-  const { width, height, dpi } = parsePngFormat(buffer);
+  if (!state.windowId) {
+    return;
+  }
 
-  const per = dpi ? dpi / 72 : window.devicePixelRatio;
+  let logicalWidth = imageElement.naturalWidth;
+  let logicalHeight = imageElement.naturalHeight;
 
-  const size = {
-    width: Math.round(width / per) || imageElement.naturalWidth,
-    height: Math.round(height / per) || imageElement.naturalHeight,
-  };
+  try {
+    const arrayBuffer = dataUrlToArrayBuffer(state.src);
+    const buffer = Buffer.from(arrayBuffer);
+    const { width, height, dpi } = parsePngFormat(buffer);
+    const scale = dpi && dpi > 0 ? dpi / 72 : 1;
 
-  window.ipc.send("set-image-size", size);
+    if (width && height && scale > 0) {
+      logicalWidth = Math.round(width / scale) || logicalWidth;
+      logicalHeight = Math.round(height / scale) || logicalHeight;
+    }
+  } catch (error) {
+    // Non-PNG images or parsing issues fall back to natural dimensions
+    logicalWidth = imageElement.naturalWidth;
+    logicalHeight = imageElement.naturalHeight;
+  }
+
+  window.ipc.send("set-image-size", {
+    windowId: state.windowId,
+    width: logicalWidth,
+    height: logicalHeight,
+  });
+  const aspectRatio =
+    logicalHeight !== 0 ? logicalWidth / logicalHeight : 1;
   window.ipc.send("link-aspect", {
     link: true,
-    ratio: size.width / size.height,
+    ratio: aspectRatio,
+    windowId: state.windowId,
   });
 };
 
 const onKeyPress = (e: KeyboardEvent) => {
   e.preventDefault();
+  if (!state.windowId) return;
   switch (e.key) {
     case "ArrowUp":
-      window.ipc.send("move-position", { x: 0, y: -1 });
+      window.ipc.send("move-position", { x: 0, y: -1, windowId: state.windowId });
       break;
     case "ArrowDown":
-      window.ipc.send("move-position", { x: 0, y: 1 });
+      window.ipc.send("move-position", { x: 0, y: 1, windowId: state.windowId });
       break;
     case "ArrowLeft":
-      window.ipc.send("move-position", { x: -1, y: 0 });
+      window.ipc.send("move-position", { x: -1, y: 0, windowId: state.windowId });
       break;
     case "ArrowRight":
-      window.ipc.send("move-position", { x: 1, y: 0 });
+      window.ipc.send("move-position", { x: 1, y: 0, windowId: state.windowId });
       break;
     default:
       break;
@@ -77,7 +100,12 @@ window.ipc.on("set-opacity", (_, payload) => {
   setOpacity(payload.opacity);
 });
 window.ipc.on("set-image", (_, payload) => {
+  state.windowId = payload.windowId ?? state.windowId;
   state.src = payload.data;
+});
+
+window.ipc.on("init-paper-window", (_, payload) => {
+  state.windowId = payload.windowId;
 });
 
 onMounted(() => {

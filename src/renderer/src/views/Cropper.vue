@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, reactive } from 'vue';
+import { computed, reactive } from "vue";
 
 const getRect = (
   start: { x: number; y: number },
@@ -53,7 +53,7 @@ const onMouseDown = (e: MouseEvent) => {
 };
 const onMouseup = (e: MouseEvent) => {
   state.isCropping = false;
-  window.ipc.send('set-rect', getRect(state.start, state.end));
+  window.ipc.send("set-rect", getRect(state.start, state.end));
 };
 const onMouseMove = (e: MouseEvent) => {
   if (!state.isCropping) return;
