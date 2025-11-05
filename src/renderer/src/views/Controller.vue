@@ -167,7 +167,7 @@ onUnmounted(() => {
       <Icon class="icon" icon="mingcute:close-line" />
     </Button>
     <div class="original-size-container">
-      <span class="label">画像サイズ</span>
+      <span class="label">Original Size</span>
       <span class="size"
         >{{ state.imageSize.width }} x {{ state.imageSize.height }}</span
       >
