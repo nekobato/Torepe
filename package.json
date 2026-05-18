@@ -27,7 +27,7 @@
     "@iconify/vue": "^5.0.1",
     "@vitejs/plugin-vue": "^6.0.6",
     "dotenv": "^17.4.2",
-    "electron": "42.0.0",
+    "electron": "42.0.1",
     "electron-builder": "^26.8.1",
     "electron-icon-builder": "^2.0.1",
     "electron-log": "^5.2.4",
