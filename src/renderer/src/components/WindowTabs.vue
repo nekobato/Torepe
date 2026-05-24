@@ -11,7 +11,6 @@
           <div class="tab-header">
             <Icon icon="mingcute:pic-line" class="tab-icon" />
             <Button
-              v-if="windowsList.length > 1"
               class="tab-close-btn"
               @click.stop="() => handleTabRemove(window.id)"
               text
@@ -70,6 +69,7 @@ import type { PaperWindowState } from "../../../shared/types/window";
 const windowsStore = useWindowsStore();
 
 const activeWindowId = ref<string>("");
+let unsubscribeIpcListeners: Array<() => void> = [];
 
 // Local tabs that may not have paper windows yet
 interface LocalTab extends Partial<PaperWindowState> {
@@ -196,13 +196,12 @@ onMounted(async () => {
   }
 
   // Set up IPC event listeners
-  window.ipc.on("paper-window-created", handlePaperWindowCreated);
-  window.ipc.on("paper-window-closed", handlePaperWindowClosed);
-  window.ipc.on("paper-window-focused", handlePaperWindowFocused);
-  window.ipc.on(
-    "paper-window-image-updated",
-    handlePaperWindowImageUpdated
-  );
+  unsubscribeIpcListeners = [
+    window.ipc.on("paper-window-created", handlePaperWindowCreated),
+    window.ipc.on("paper-window-closed", handlePaperWindowClosed),
+    window.ipc.on("paper-window-focused", handlePaperWindowFocused),
+    window.ipc.on("paper-window-image-updated", handlePaperWindowImageUpdated),
+  ];
 
   // Set initial active tab
   if (windowsStore.activeWindowId) {
@@ -213,11 +212,8 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  // Clean up event listeners
-  window.ipc.removeAllListeners("paper-window-created");
-  window.ipc.removeAllListeners("paper-window-closed");
-  window.ipc.removeAllListeners("paper-window-focused");
-  window.ipc.removeAllListeners("paper-window-image-updated");
+  unsubscribeIpcListeners.forEach((unsubscribe) => unsubscribe());
+  unsubscribeIpcListeners = [];
 });
 </script>
 
@@ -240,23 +236,50 @@ onUnmounted(() => {
 }
 
 .tab-content {
-  height: calc(100vh - 60px);
+  height: 100%;
+  min-height: 0;
   overflow: hidden;
 }
 
 :deep(.p-tabs) {
   height: 100%;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  min-height: 0;
 }
 
 :deep(.p-tablist) {
-  flex-shrink: 0;
+  flex: 0 0 72px;
+  height: 100%;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
+}
+
+:deep(.p-tablist-content) {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+:deep(.p-tablist-tab-list) {
+  display: flex;
+  flex-direction: column;
+}
+
+:deep(.p-tablist-active-bar) {
+  display: none;
+}
+
+:deep(.p-tab) {
+  width: 100%;
+  justify-content: center;
 }
 
 :deep(.p-tabpanels) {
   flex: 1;
-  height: 0;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
 }
 
 :deep(.p-tabpanel) {

@@ -27,10 +27,97 @@ if (!app.requestSingleInstanceLock()) {
 
 let controllerWindow: BrowserWindow | null;
 const paperWindows = new Map<string, BrowserWindow>();
+const paperWindowClickThrough = new Map<string, boolean>();
 let windowIdCounter = 0;
 
+/**
+ * Generates a stable application-level paper window ID.
+ */
 function generateWindowId(): string {
   return `window-${++windowIdCounter}`;
+}
+
+/**
+ * Returns a user-facing title for the controller tab that owns a paper window.
+ */
+function getPaperWindowTitle(windowId: string): string {
+  const generatedWindowIndex = windowId.match(/^window-(\d+)$/)?.[1];
+  return generatedWindowIndex
+    ? `Window ${generatedWindowIndex}`
+    : `Window ${windowId.replace(/^tab-/, "")}`;
+}
+
+/**
+ * Sends an IPC event to the controller window if it is still available.
+ */
+function sendToController(channel: string, payload: unknown): void {
+  if (!controllerWindow || controllerWindow.isDestroyed()) return;
+  controllerWindow.webContents.send(channel, payload);
+}
+
+/**
+ * Loads the paper view for a BrowserWindow.
+ */
+function loadPaperWindow(paperWindow: BrowserWindow): void {
+  if (isDevelopment) {
+    paperWindow.loadURL(pageRoot + "#/paper");
+    paperWindow.webContents.openDevTools();
+  } else {
+    paperWindow.loadFile(pageRoot, { hash: "/paper" });
+  }
+}
+
+/**
+ * Builds the renderer-facing state object for a paper window.
+ */
+function toPaperWindowState(
+  windowId: string,
+  paperWindow: BrowserWindow
+): PaperWindowState {
+  return {
+    id: windowId,
+    windowId: paperWindow.id,
+    title: getPaperWindowTitle(windowId),
+    bounds: paperWindow.getBounds(),
+    opacity: paperWindow.getOpacity(),
+    clickThrough: paperWindowClickThrough.get(windowId) ?? false,
+    isActive: paperWindow.isFocused(),
+  };
+}
+
+/**
+ * Registers lifecycle and geometry notifications for a paper window.
+ */
+function registerPaperWindowEvents(
+  windowId: string,
+  paperWindow: BrowserWindow
+): void {
+  paperWindow.on("closed", () => {
+    paperWindows.delete(windowId);
+    paperWindowClickThrough.delete(windowId);
+    sendToController("paper-window-closed", windowId);
+  });
+
+  paperWindow.on("focus", () => {
+    sendToController("paper-window-focused", windowId);
+  });
+
+  paperWindow.on("moved", () => {
+    if (paperWindow.isDestroyed()) return;
+    sendToController("window-rectangle", {
+      windowId,
+      ...paperWindow.getBounds(),
+      original: false,
+    });
+  });
+
+  paperWindow.on("will-resize", (_, rectangle) => {
+    sendToController("window-rectangle", {
+      windowId,
+      ...rectangle,
+      original: false,
+    });
+  });
 }
 
 protocol.registerSchemesAsPrivileged([
@@ -42,8 +129,15 @@ checkUpdate();
 const menu = Menu.buildFromTemplate([{ role: "appMenu" }]);
 Menu.setApplicationMenu(menu);
 
-function createPaperWindow(): string {
-  const windowId = generateWindowId();
+/**
+ * Creates, registers, and loads a transparent paper window.
+ */
+function createPaperWindow(windowId = generateWindowId()): string {
+  const existingPaperWindow = paperWindows.get(windowId);
+  if (existingPaperWindow && !existingPaperWindow.isDestroyed()) {
+    return windowId;
+  }
+
   const paperWindow = new BrowserWindow({
     title: `Torepe - ${windowId}`,
     frame: false,
@@ -54,69 +148,26 @@ function createPaperWindow(): string {
     webPreferences: {
       preload: preload,
     },
-    alwaysOnTop: true,
+    alwaysOnTop: false,
     show: false,
   });
 
   paperWindows.set(windowId, paperWindow);
+  paperWindowClickThrough.set(windowId, false);
 
   paperWindow.webContents.once("did-finish-load", () => {
     if (paperWindow.isDestroyed()) return;
     paperWindow.webContents.send("init-paper-window", { windowId });
   });
 
-  if (isDevelopment) {
-    paperWindow.loadURL(pageRoot + "#/paper");
-    paperWindow.webContents.openDevTools();
-  } else {
-    paperWindow.loadFile(pageRoot, { hash: "/paper" });
-  }
-
-  // Set up event handlers for this window
-  paperWindow.on("closed", () => {
-    paperWindows.delete(windowId);
-    if (controllerWindow && !controllerWindow.isDestroyed()) {
-      controllerWindow.webContents.send("paper-window-closed", windowId);
-    }
-  });
-
-  paperWindow.on("focus", () => {
-    if (controllerWindow && !controllerWindow.isDestroyed()) {
-      controllerWindow.webContents.send("paper-window-focused", windowId);
-    }
-  });
-
-  paperWindow.on("moved", () => {
-    if (!controllerWindow || controllerWindow.isDestroyed()) return;
-    controllerWindow.webContents.send("window-rectangle", {
-      windowId,
-      ...paperWindow.getBounds(),
-      original: false,
-    });
-  });
-
-  paperWindow.on("will-resize", (_, rectangle) => {
-    if (!controllerWindow || controllerWindow.isDestroyed()) return;
-    controllerWindow.webContents.send("window-rectangle", {
-      windowId,
-      ...rectangle,
-      original: false,
-    });
-  });
+  loadPaperWindow(paperWindow);
+  registerPaperWindowEvents(windowId, paperWindow);
 
   // Notify controller about new window
-  if (controllerWindow && !controllerWindow.isDestroyed()) {
-    const windowState: PaperWindowState = {
-      id: windowId,
-      windowId: paperWindow.id,
-      title: `Window ${windowIdCounter}`,
-      bounds: paperWindow.getBounds(),
-      opacity: 1,
-      clickThrough: false,
-      isActive: true,
-    };
-    controllerWindow.webContents.send("paper-window-created", windowState);
-  }
+  sendToController(
+    "paper-window-created",
+    toPaperWindowState(windowId, paperWindow)
+  );
 
   return windowId;
 }
@@ -151,81 +202,7 @@ function createWindow() {
   });
 
   ipcMain.handle("create-paper-window-with-id", (_, windowId: string) => {
-    const paperWindow = new BrowserWindow({
-      title: `Torepe - ${windowId}`,
-      frame: false,
-      hasShadow: false,
-      transparent: true,
-      resizable: true,
-      roundedCorners: false,
-      webPreferences: {
-        preload: preload,
-      },
-      alwaysOnTop: true,
-      show: false,
-    });
-
-    paperWindows.set(windowId, paperWindow);
-
-    paperWindow.webContents.once("did-finish-load", () => {
-      if (paperWindow.isDestroyed()) return;
-      paperWindow.webContents.send("init-paper-window", { windowId });
-    });
-
-    if (isDevelopment) {
-      paperWindow.loadURL(pageRoot + "#/paper");
-      paperWindow.webContents.openDevTools();
-    } else {
-      paperWindow.loadFile(pageRoot, { hash: "/paper" });
-    }
-
-    // Set up event handlers for this window
-    paperWindow.on("closed", () => {
-      paperWindows.delete(windowId);
-      if (controllerWindow && !controllerWindow.isDestroyed()) {
-        controllerWindow.webContents.send("paper-window-closed", windowId);
-      }
-    });
-
-    paperWindow.on("focus", () => {
-      if (controllerWindow && !controllerWindow.isDestroyed()) {
-        controllerWindow.webContents.send("paper-window-focused", windowId);
-      }
-    });
-
-    paperWindow.on("moved", () => {
-      if (!controllerWindow || controllerWindow.isDestroyed()) return;
-      controllerWindow.webContents.send("window-rectangle", {
-        windowId,
-        ...paperWindow.getBounds(),
-        original: false,
-      });
-    });
-
-    paperWindow.on("will-resize", (_, rectangle) => {
-      if (!controllerWindow || controllerWindow.isDestroyed()) return;
-      controllerWindow.webContents.send("window-rectangle", {
-        windowId,
-        ...rectangle,
-        original: false,
-      });
-    });
-
-    // Notify controller about new window
-    if (controllerWindow && !controllerWindow.isDestroyed()) {
-      const windowState: PaperWindowState = {
-        id: windowId,
-        windowId: paperWindow.id,
-        title: `Window ${windowId.split("-")[1]}`,
-        bounds: paperWindow.getBounds(),
-        opacity: 1,
-        clickThrough: false,
-        isActive: true,
-      };
-      controllerWindow.webContents.send("paper-window-created", windowState);
-    }
-
-    return windowId;
+    return createPaperWindow(windowId);
   });
 
   ipcMain.handle("close-paper-window", (_, windowId: string) => {
@@ -246,22 +223,15 @@ function createWindow() {
     const states: PaperWindowState[] = [];
     paperWindows.forEach((window, id) => {
       if (!window.isDestroyed()) {
-        states.push({
-          id,
-          windowId: window.id,
-          title: window.getTitle(),
-          bounds: window.getBounds(),
-          opacity: window.getOpacity(),
-          clickThrough: window.isAlwaysOnTop(),
-          isActive: window.isFocused(),
-        });
+        states.push(toPaperWindowState(id, window));
       }
     });
     return states;
   });
 
   ipcMain.on("renderer-event", (_, event: string, payload: any) => {
-    const windowId = payload.windowId;
+    const windowId =
+      typeof payload?.windowId === "string" ? payload.windowId : undefined;
     const paperWindow = windowId ? paperWindows.get(windowId) : null;
 
     if (!controllerWindow) return;
@@ -273,9 +243,11 @@ function createWindow() {
         }
         break;
       case "toggle-clickthrough":
-        if (paperWindow && !paperWindow.isDestroyed()) {
-          paperWindow.setIgnoreMouseEvents(payload.toggle);
-          paperWindow.setAlwaysOnTop(payload.toggle);
+        if (windowId && paperWindow && !paperWindow.isDestroyed()) {
+          const clickThrough = Boolean(payload.toggle);
+          paperWindow.setIgnoreMouseEvents(clickThrough);
+          paperWindow.setAlwaysOnTop(clickThrough);
+          paperWindowClickThrough.set(windowId, clickThrough);
         }
         break;
       case "set-bounds":
@@ -331,9 +303,6 @@ function createWindow() {
           sendToPaperWindow();
         }
 
-        if (windowId) {
-          controllerWindow.webContents?.send("goto-controller", { windowId });
-        }
         break;
       }
       case "set-image-size":
@@ -370,6 +339,7 @@ function createWindow() {
             paperWindow.setAspectRatio(0);
           }
         }
+        break;
       case "error":
         log.error(payload);
         break;

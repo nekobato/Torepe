@@ -1,18 +1,16 @@
 export {};
 
 import type { PaperWindowState } from "../../shared/types/window";
+import type { IpcRendererEvent } from "electron";
 
 type EventMap = {
   "set-opacity": {
     opacity: number;
   };
   "set-image": {
-    type: "file" | "clipboard";
+    type: "data" | "file" | "clipboard";
     data: string;
     windowId?: string;
-  };
-  "goto-controller": {
-    windowId: string;
   };
   "window-rectangle": {
     windowId: string;
@@ -42,10 +40,9 @@ declare global {
       send: (event: string, payload?: any) => void;
       on: <K extends keyof EventMap>(
         event: K,
-        callback: (event: K, payload: EventMap[K]) => void
-      ) => void;
+        callback: (event: IpcRendererEvent, payload: EventMap[K]) => void
+      ) => () => void;
       invoke: (channel: string, ...args: any[]) => Promise<any>;
-      removeAllListeners: (channel: string) => void;
     };
     removeLoading: () => void;
   }

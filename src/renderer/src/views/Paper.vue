@@ -14,6 +14,7 @@ const state = reactive({
   opacity: 100,
   windowId: "",
 });
+let unsubscribeIpcListeners: Array<() => void> = [];
 
 const dataUrlToArrayBuffer = (dataUrl: string) => {
   const base64 = dataUrl.split(",")[1];
@@ -66,8 +67,7 @@ const onLoad = (e: Event) => {
     width: logicalWidth,
     height: logicalHeight,
   });
-  const aspectRatio =
-    logicalHeight !== 0 ? logicalWidth / logicalHeight : 1;
+  const aspectRatio = logicalHeight !== 0 ? logicalWidth / logicalHeight : 1;
   window.ipc.send("link-aspect", {
     link: true,
     ratio: aspectRatio,
@@ -80,39 +80,57 @@ const onKeyPress = (e: KeyboardEvent) => {
   if (!state.windowId) return;
   switch (e.key) {
     case "ArrowUp":
-      window.ipc.send("move-position", { x: 0, y: -1, windowId: state.windowId });
+      window.ipc.send("move-position", {
+        x: 0,
+        y: -1,
+        windowId: state.windowId,
+      });
       break;
     case "ArrowDown":
-      window.ipc.send("move-position", { x: 0, y: 1, windowId: state.windowId });
+      window.ipc.send("move-position", {
+        x: 0,
+        y: 1,
+        windowId: state.windowId,
+      });
       break;
     case "ArrowLeft":
-      window.ipc.send("move-position", { x: -1, y: 0, windowId: state.windowId });
+      window.ipc.send("move-position", {
+        x: -1,
+        y: 0,
+        windowId: state.windowId,
+      });
       break;
     case "ArrowRight":
-      window.ipc.send("move-position", { x: 1, y: 0, windowId: state.windowId });
+      window.ipc.send("move-position", {
+        x: 1,
+        y: 0,
+        windowId: state.windowId,
+      });
       break;
     default:
       break;
   }
 };
 
-window.ipc.on("set-opacity", (_, payload) => {
-  setOpacity(payload.opacity);
-});
-window.ipc.on("set-image", (_, payload) => {
-  state.windowId = payload.windowId ?? state.windowId;
-  state.src = payload.data;
-});
-
-window.ipc.on("init-paper-window", (_, payload) => {
-  state.windowId = payload.windowId;
-});
-
 onMounted(() => {
+  unsubscribeIpcListeners = [
+    window.ipc.on("set-opacity", (_, payload) => {
+      setOpacity(payload.opacity);
+    }),
+    window.ipc.on("set-image", (_, payload) => {
+      state.windowId = payload.windowId ?? state.windowId;
+      state.src = payload.data;
+    }),
+    window.ipc.on("init-paper-window", (_, payload) => {
+      state.windowId = payload.windowId;
+    }),
+  ];
   document.addEventListener("keydown", onKeyPress);
 });
 
 onBeforeUnmount(() => {
+  unsubscribeIpcListeners.forEach((unsubscribe) => unsubscribe());
+  unsubscribeIpcListeners = [];
   document.removeEventListener("keydown", onKeyPress);
 });
 </script>

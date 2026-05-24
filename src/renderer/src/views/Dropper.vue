@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { onMounted, reactive, onUnmounted } from "vue";
+import { reactive } from "vue";
 import { useWindowsStore } from "../stores/windows";
 
 interface Props {
@@ -74,24 +74,6 @@ const fromClipboard = async () => {
     windowId: targetWindowId,
   });
 };
-
-const handleGotoController = (event: any, payload: any) => {
-  if (payload.windowId === props.windowId) {
-    // Update window state to show it has an image
-    windowsStore.updateWindow(props.windowId, {
-      imageData: {
-        path: "",
-        dataUrl: "",
-        width: 0,
-        height: 0,
-      },
-    });
-  }
-};
-
-onMounted(() => {
-  window.ipc.on("goto-controller", handleGotoController);
-});
 </script>
 <template>
   <div class="form">

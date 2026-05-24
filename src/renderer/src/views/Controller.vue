@@ -14,6 +14,7 @@ interface Props {
 
 const props = defineProps<Props>();
 const windowsStore = useWindowsStore();
+let unsubscribeWindowRectangle: (() => void) | undefined;
 
 const state = reactive({
   clickThrough: false,
@@ -34,11 +35,13 @@ const state = reactive({
 });
 
 const toggleClickThrough = () => {
+  const nextClickThrough = !state.clickThrough;
   window.ipc.send("toggle-clickthrough", {
-    toggle: !state.clickThrough,
+    toggle: nextClickThrough,
     windowId: props.windowId,
   });
-  state.clickThrough = !state.clickThrough;
+  state.clickThrough = nextClickThrough;
+  windowsStore.updateWindow(props.windowId, { clickThrough: nextClickThrough });
 };
 const onChangeWidth = (newWidth?: number) => {
   if (state.aspectLink) {
@@ -148,24 +151,19 @@ onMounted(() => {
     }
   }
 
-  window.ipc.on("window-rectangle", handleWindowRectangle);
+  unsubscribeWindowRectangle = window.ipc.on(
+    "window-rectangle",
+    handleWindowRectangle
+  );
 });
 
 onUnmounted(() => {
-  window.ipc.removeAllListeners("window-rectangle");
+  unsubscribeWindowRectangle?.();
+  unsubscribeWindowRectangle = undefined;
 });
 </script>
 <template>
   <div class="controller">
-    <Button
-      class="close"
-      @click="closeWindow"
-      severity="danger"
-      size="small"
-      text
-    >
-      <Icon class="icon" icon="mingcute:close-line" />
-    </Button>
     <div class="original-size-container">
       <span class="label">Original Size</span>
       <span class="size"
@@ -184,6 +182,20 @@ onUnmounted(() => {
             @update:model-value="onChangeWidth"
           />
         </div>
+        <Button
+          class="link-aspect-button"
+          @click="linkAspect"
+          text
+          size="small"
+          rounded
+        >
+          <Icon
+            icon="mingcute:link-2-line"
+            class="link-aspect-icon"
+            v-if="state.aspectLink"
+          />
+          <Icon icon="mingcute:unlink-2-line" class="link-aspect-icon" v-else />
+        </Button>
         <div class="form-item">
           <label>Height</label>
           <InputNumber
@@ -195,14 +207,6 @@ onUnmounted(() => {
           />
         </div>
       </div>
-      <Button class="link-aspect-button" @click="linkAspect" text>
-        <Icon
-          icon="mingcute:link-2-line"
-          class="link-aspect-icon"
-          v-if="state.aspectLink"
-        />
-        <Icon icon="mingcute:unlink-2-line" class="link-aspect-icon" v-else />
-      </Button>
     </div>
     <div class="opacity">
       <label>OPACITY</label>
@@ -253,26 +257,27 @@ onUnmounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 4px;
   .form-item-group {
     display: flex;
     align-items: flex-end;
-    flex-direction: column;
-    gap: 8px;
+    gap: 2px;
     .form-item {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 2px;
       label {
         font-size: 12px;
         font-weight: bold;
         text-transform: uppercase;
         & + .input {
-          margin-left: 4px;
+          width: 60px;
         }
       }
       .input {
-        width: 100px;
+        width: 60px;
       }
       :deep(.p-inputnumber-input) {
-        width: 100px;
+        width: 60px;
       }
     }
   }
