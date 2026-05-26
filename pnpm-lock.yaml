@@ -9,80 +9,80 @@ importers:
   .:
     dependencies:
       '@primevue/themes':
-        specifier: ^4.4.1
+        specifier: 4.4.1
         version: 4.4.1
       png-dpi-reader-writer:
-        specifier: ^0.2.4
+        specifier: 0.2.4
         version: 0.2.4
       primeicons:
-        specifier: ^7.0.0
+        specifier: 7.0.0
         version: 7.0.0
       primevue:
-        specifier: ^4.4.1
+        specifier: 4.4.1
         version: 4.4.1(vue@3.5.22(typescript@5.9.3))
     devDependencies:
       '@electron/notarize':
-        specifier: ^3.1.0
+        specifier: 3.1.0
         version: 3.1.0
       '@iconify/vue':
-        specifier: ^5.0.0
+        specifier: 5.0.0
         version: 5.0.0(vue@3.5.22(typescript@5.9.3))
       '@types/node':
-        specifier: ^24.7.2
+        specifier: 24.7.2
         version: 24.7.2
       '@vitejs/plugin-vue':
-        specifier: ^6.0.1
+        specifier: 6.0.1
         version: 6.0.1(vite@7.1.9(@types/node@24.7.2)(sass-embedded@1.93.2)(sass@1.93.2))(vue@3.5.22(typescript@5.9.3))
       dotenv:
-        specifier: ^17.2.3
+        specifier: 17.2.3
         version: 17.2.3
       electron:
         specifier: 38.2.2
         version: 38.2.2
       electron-builder:
-        specifier: ^26.0.12
+        specifier: 26.0.12
         version: 26.0.12(electron-builder-squirrel-windows@25.1.8)
       electron-icon-builder:
-        specifier: ^2.0.1
+        specifier: 2.0.1
         version: 2.0.1
       electron-log:
-        specifier: ^5.4.3
+        specifier: 5.4.3
         version: 5.4.3
       electron-updater:
-        specifier: ^6.6.2
+        specifier: 6.6.2
         version: 6.6.2
       electron-vite:
-        specifier: ^4.0.1
+        specifier: 4.0.1
         version: 4.0.1(vite@7.1.9(@types/node@24.7.2)(sass-embedded@1.93.2)(sass@1.93.2))
       pinia:
-        specifier: ^3.0.3
+        specifier: 3.0.3
         version: 3.0.3(typescript@5.9.3)(vue@3.5.22(typescript@5.9.3))
       prettier:
-        specifier: ^3.6.2
+        specifier: 3.6.2
         version: 3.6.2
       sass-embedded:
-        specifier: ^1.93.2
+        specifier: 1.93.2
         version: 1.93.2
       typescript:
-        specifier: ^5.9.3
+        specifier: 5.9.3
         version: 5.9.3
       vite:
-        specifier: ^7.1.9
+        specifier: 7.1.9
         version: 7.1.9(@types/node@24.7.2)(sass-embedded@1.93.2)(sass@1.93.2)
       vite-plugin-electron:
-        specifier: ^0.29.0
+        specifier: 0.29.0
         version: 0.29.0(vite-plugin-electron-renderer@0.14.6)
       vite-plugin-electron-renderer:
-        specifier: ^0.14.6
+        specifier: 0.14.6
         version: 0.14.6
       vue:
-        specifier: ^3.5.22
+        specifier: 3.5.22
         version: 3.5.22(typescript@5.9.3)
       vue-router:
-        specifier: ^4.6.0
+        specifier: 4.6.0
         version: 4.6.0(vue@3.5.22(typescript@5.9.3))
       vue-tsc:
-        specifier: ^3.1.1
+        specifier: 3.1.1
         version: 3.1.1(typescript@5.9.3)
 
 packages:
