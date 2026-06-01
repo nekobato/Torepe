@@ -1,5 +1,17 @@
 <template>
   <div class="window-tabs">
+    <Button
+      class="add-window-btn"
+      severity="primary"
+      size="small"
+      aria-label="Add window"
+      title="Add window"
+      @click="addNewWindow"
+      text
+    >
+      <i class="pi pi-plus"></i>
+    </Button>
+
     <Tabs v-model:value="activeWindowId">
       <TabList>
         <Tab
@@ -39,16 +51,6 @@
         </TabPanel>
       </TabPanels>
     </Tabs>
-
-    <Button
-      class="add-window-btn"
-      severity="primary"
-      size="small"
-      @click="addNewWindow"
-      text
-    >
-      <i class="pi pi-plus"></i>
-    </Button>
   </div>
 </template>
 
@@ -219,6 +221,10 @@ onUnmounted(() => {
 
 <style scoped>
 .window-tabs {
+  --tab-list-width: 72px;
+  --add-window-btn-size: 32px;
+  --add-window-btn-offset: 8px;
+
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -227,11 +233,12 @@ onUnmounted(() => {
 
 .add-window-btn {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: var(--add-window-btn-offset);
+  left: calc((var(--tab-list-width) - var(--add-window-btn-size)) / 2);
   z-index: 10;
-  width: 32px;
-  height: 32px;
+  width: var(--add-window-btn-size);
+  height: var(--add-window-btn-size);
+  min-width: var(--add-window-btn-size);
   border-radius: 50%;
 }
 
@@ -249,7 +256,7 @@ onUnmounted(() => {
 }
 
 :deep(.p-tablist) {
-  flex: 0 0 72px;
+  flex: 0 0 var(--tab-list-width);
   height: 100%;
   border-right: 1px solid rgba(0, 0, 0, 0.08);
   box-sizing: border-box;
@@ -257,6 +264,10 @@ onUnmounted(() => {
 
 :deep(.p-tablist-content) {
   height: 100%;
+  padding-block-start: calc(
+    var(--add-window-btn-size) + (var(--add-window-btn-offset) * 2)
+  );
+  box-sizing: border-box;
   overflow-y: auto;
   overflow-x: hidden;
 }

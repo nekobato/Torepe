@@ -93,10 +93,10 @@ const fromClipboard = async () => {
           accept="image/*"
           @change="onChangeFile"
         />
-        <span class="text-row">Select image file</span>
+        <span class="text-row">Select File</span>
       </label>
       <button class="clipboard-button" @click="fromClipboard">
-        <span class="text-row">Read clipboard</span>
+        <span class="text-row">Read Clipboard</span>
       </button>
     </div>
   </div>

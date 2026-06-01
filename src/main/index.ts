@@ -61,7 +61,7 @@ function sendToController(channel: string, payload: unknown): void {
 function loadPaperWindow(paperWindow: BrowserWindow): void {
   if (isDevelopment) {
     paperWindow.loadURL(pageRoot + "#/paper");
-    paperWindow.webContents.openDevTools();
+    paperWindow.webContents.openDevTools({ mode: "detach" });
   } else {
     paperWindow.loadFile(pageRoot, { hash: "/paper" });
   }
@@ -175,7 +175,7 @@ function createPaperWindow(windowId = generateWindowId()): string {
 function createWindow() {
   controllerWindow = new BrowserWindow({
     title: "Torepe",
-    width: 240,
+    width: 320,
     height: 400,
     resizable: false,
     webPreferences: {
@@ -187,7 +187,7 @@ function createWindow() {
 
   if (isDevelopment) {
     controllerWindow.loadURL(pageRoot);
-    controllerWindow.webContents.openDevTools();
+    controllerWindow.webContents.openDevTools({ mode: "detach" });
   } else {
     controllerWindow.loadFile(pageRoot);
   }
