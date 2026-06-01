@@ -5,6 +5,7 @@ export interface PaperWindowState {
   imageData?: {
     path?: string;
     dataUrl?: string;
+    filename?: string;
     width: number;
     height: number;
   };

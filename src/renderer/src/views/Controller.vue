@@ -74,14 +74,6 @@ const onChangeHeight = (newHeight?: number) => {
   });
 };
 
-const resetImage = () => {
-  window.ipc.send("reset-image", { windowId: props.windowId });
-  windowsStore.updateWindow(props.windowId, { imageData: undefined });
-};
-
-const closeWindow = () => {
-  window.ipc.invoke("close-paper-window", props.windowId);
-};
 const linkAspect = () => {
   state.aspectLink = !state.aspectLink;
   window.ipc.send("link-aspect", {
@@ -165,48 +157,46 @@ onUnmounted(() => {
 <template>
   <div class="controller">
     <div class="original-size-container">
-      <span class="label">Original Size</span>
+      <span class="label">Original</span>
       <span class="size"
         >{{ state.imageSize.width }} x {{ state.imageSize.height }}</span
       >
     </div>
     <div class="size-fields">
-      <div class="form-item-group">
-        <div class="form-item">
-          <label>Width</label>
-          <InputNumber
-            v-model="state.windowSize.width"
-            :min="1"
-            size="small"
-            class="input"
-            @update:model-value="onChangeWidth"
-          />
-        </div>
-        <Button
-          class="link-aspect-button"
-          @click="linkAspect"
-          text
+      <div class="form-item">
+        <label>Width</label>
+        <InputNumber
+          v-model="state.windowSize.width"
+          :min="1"
           size="small"
-          rounded
-        >
-          <Icon
-            icon="mingcute:link-2-line"
-            class="link-aspect-icon"
-            v-if="state.aspectLink"
-          />
-          <Icon icon="mingcute:unlink-2-line" class="link-aspect-icon" v-else />
-        </Button>
-        <div class="form-item">
-          <label>Height</label>
-          <InputNumber
-            v-model="state.windowSize.height"
-            :min="1"
-            size="small"
-            class="input"
-            @update:model-value="onChangeHeight"
-          />
-        </div>
+          class="input"
+          @update:model-value="onChangeWidth"
+        />
       </div>
+      <div class="form-item">
+        <label>Height</label>
+        <InputNumber
+          v-model="state.windowSize.height"
+          :min="1"
+          size="small"
+          class="input"
+          @update:model-value="onChangeHeight"
+        />
+      </div>
+      <Button
+        class="link-aspect-button"
+        @click="linkAspect"
+        text
+        size="small"
+        rounded
+      >
+        <Icon
+          icon="mingcute:link-2-line"
+          class="link-aspect-icon"
+          v-if="state.aspectLink"
+        />
+        <Icon icon="mingcute:unlink-2-line" class="link-aspect-icon" v-else />
+      </Button>
     </div>
     <div class="opacity">
       <label>OPACITY</label>
@@ -248,41 +238,38 @@ onUnmounted(() => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  width: 240px;
   height: 100%;
-  gap: 8px;
+  gap: 16px;
+  padding: 16px;
 }
 .size-fields {
-  margin-top: 52px;
-  position: relative;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  .form-item-group {
-    display: flex;
-    align-items: flex-end;
+  gap: 8px;
+  width: 100%;
+  align-items: flex-end;
+
+  .form-item {
+    flex-grow: 1;
+    display: inline-flex;
+    flex-direction: column;
     gap: 2px;
-    .form-item {
-      display: inline-flex;
-      flex-direction: column;
-      gap: 2px;
-      label {
-        font-size: 12px;
-        font-weight: bold;
-        text-transform: uppercase;
-        & + .input {
-          width: 60px;
-        }
-      }
-      .input {
-        width: 60px;
-      }
-      :deep(.p-inputnumber-input) {
-        width: 60px;
-      }
+    width: 100%;
+    label {
+      font-size: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    .input {
+      width: 100%;
+    }
+    :deep(.p-inputnumber-input) {
+      width: 100%;
     }
   }
 
   .link-aspect-button {
+    flex-shrink: 0;
     .link-aspect-icon {
       width: 20px;
       height: 20px;
@@ -290,22 +277,20 @@ onUnmounted(() => {
   }
 }
 .original-size-container {
-  position: absolute;
-  top: 8px;
-  right: 8px;
   flex-shrink: 0;
   display: flex;
+  width: 100%;
   flex-direction: column;
-  align-items: flex-end;
-  height: 48px;
   .label {
     font-size: 12px;
     font-weight: bold;
+    text-transform: uppercase;
   }
   .size {
     margin-top: 4px;
-    font-size: 18px;
+    font-size: 14px;
     line-height: 1;
+    color: #ffffff;
   }
 }
 .reset {
@@ -316,17 +301,10 @@ onUnmounted(() => {
     margin-left: 4px;
   }
 }
-.close {
-  position: absolute;
-  top: 8px;
-  left: 48px;
-  .icon {
-    width: 16px;
-    height: 16px;
-  }
-}
 .clickthrough {
+  width: 100%;
   .clickthrough-button {
+    width: 100%;
     .icon {
       width: 20px;
       height: 20px;
@@ -364,16 +342,11 @@ onUnmounted(() => {
   }
 }
 .opacity {
+  width: 100%;
   label {
     font-size: 12px;
     font-weight: bold;
     text-transform: uppercase;
-  }
-  .opacity-slider {
-    width: 160px;
-  }
-  :deep(.p-slider) {
-    width: 160px;
   }
 }
 </style>

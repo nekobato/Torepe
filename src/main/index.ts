@@ -173,11 +173,17 @@ function createPaperWindow(windowId = generateWindowId()): string {
 }
 
 function createWindow() {
+  const controllerWindowWidth = 400;
+  const controllerWindowHeight = 400;
+
   controllerWindow = new BrowserWindow({
     title: "Torepe",
-    width: 320,
-    height: 400,
-    resizable: false,
+    width: controllerWindowWidth,
+    height: controllerWindowHeight,
+    minWidth: controllerWindowWidth,
+    minHeight: controllerWindowHeight,
+    maxHeight: controllerWindowHeight,
+    resizable: true,
     webPreferences: {
       preload: preload,
     },
@@ -282,6 +288,7 @@ function createWindow() {
           }
 
           payload.data = image.toDataURL();
+          payload.filename = payload.filename ?? "Clipboard image";
         }
 
         if (!paperWindow || paperWindow.isDestroyed()) {
@@ -313,6 +320,7 @@ function createWindow() {
               windowId,
               width: payload.width,
               height: payload.height,
+              filename: payload.filename,
             });
             controllerWindow.webContents.send("window-rectangle", {
               windowId,

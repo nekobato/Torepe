@@ -10,6 +10,7 @@ type EventMap = {
   "set-image": {
     type: "data" | "file" | "clipboard";
     data: string;
+    filename?: string;
     windowId?: string;
   };
   "window-rectangle": {
@@ -30,6 +31,7 @@ type EventMap = {
     windowId: string;
     width: number;
     height: number;
+    filename?: string;
   };
 };
 

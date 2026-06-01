@@ -10,6 +10,7 @@ const props = defineProps<Props>();
 const windowsStore = useWindowsStore();
 
 const state = reactive({ isDragOver: false });
+const CLIPBOARD_IMAGE_FILENAME = "Clipboard image";
 
 const onDragOver = () => {
   state.isDragOver = true;
@@ -24,12 +25,25 @@ const onDrop = (e: DragEvent) => {
 const onDragLeave = () => {
   state.isDragOver = false;
 };
-const onChangeFile = (e: any) => {
-  sendFile(e.target.files[0]);
+
+/**
+ * Sends the selected file to the active paper window.
+ */
+const onChangeFile = (e: Event) => {
+  const input = e.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (!file) return;
+  sendFile(file);
 };
+
+/**
+ * Reads an image file and forwards its data URL with the source filename.
+ */
 const sendFile = async (file: File) => {
   const reader = new FileReader();
   reader.onload = async () => {
+    if (typeof reader.result !== "string") return;
+
     // Create paper window if it doesn't exist
     const isLocalTab = !windowsStore.windowsList.find(
       (w) => w.id === props.windowId
@@ -48,11 +62,16 @@ const sendFile = async (file: File) => {
     window.ipc.send("set-image", {
       type: "data",
       data: reader.result,
+      filename: file.name,
       windowId: targetWindowId,
     });
   };
   reader.readAsDataURL(file);
 };
+
+/**
+ * Forwards the current clipboard image using the clipboard fallback filename.
+ */
 const fromClipboard = async () => {
   // Create paper window if it doesn't exist
   const isLocalTab = !windowsStore.windowsList.find(
@@ -71,6 +90,7 @@ const fromClipboard = async () => {
 
   window.ipc.send("set-image", {
     type: "clipboard",
+    filename: CLIPBOARD_IMAGE_FILENAME,
     windowId: targetWindowId,
   });
 };
@@ -114,6 +134,7 @@ const fromClipboard = async () => {
     text-align: center;
     border: 2px dotted rgba(255, 255, 255, 0.16);
     border-radius: 8px;
+    padding: 16px;
     &.on-dragover {
       border: 2px dotted rgba(255, 255, 255, 0.48);
     }
@@ -135,7 +156,7 @@ const fromClipboard = async () => {
     align-items: center;
     justify-content: center;
     margin: 0 auto;
-    width: 160px;
+    width: 100%;
     height: 40px;
     border: 1px solid rgba(255, 255, 255, 0.24);
     border-radius: 4px;

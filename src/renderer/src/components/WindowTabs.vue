@@ -1,186 +1,227 @@
 <template>
   <div class="window-tabs">
-    <Button
-      class="add-window-btn"
-      severity="primary"
-      size="small"
-      aria-label="Add window"
-      title="Add window"
-      @click="addNewWindow"
-      text
-    >
-      <i class="pi pi-plus"></i>
-    </Button>
+    <aside class="image-list-pane" aria-label="Image list">
+      <Button
+        class="add-window-btn"
+        icon="pi pi-plus"
+        severity="primary"
+        size="small"
+        rounded
+        aria-label="Add image"
+        title="Add image"
+        @click="addNewWindow"
+      />
 
-    <Tabs v-model:value="activeWindowId">
-      <TabList>
-        <Tab
+      <div class="image-chip-list" role="listbox" aria-label="Images">
+        <div
           v-for="window in windowsList"
           :key="window.id"
-          :value="window.id"
-          @click="() => handleTabChange(window.id)"
+          class="image-chip-item"
+          :class="{ 'is-active': activeWindowId === window.id }"
+          role="option"
+          :aria-selected="activeWindowId === window.id"
+          tabindex="0"
+          :title="getWindowFilename(window)"
+          @click="() => handleChipSelect(window.id)"
+          @keydown.enter.prevent="() => handleChipSelect(window.id)"
+          @keydown.space.prevent="() => handleChipSelect(window.id)"
         >
-          <div class="tab-header">
-            <Icon icon="mingcute:pic-line" class="tab-icon" />
-            <Button
-              class="tab-close-btn"
-              @click.stop="() => handleTabRemove(window.id)"
-              text
-              size="small"
-            >
-              <i class="pi pi-times"></i>
-            </Button>
-          </div>
-        </Tab>
-      </TabList>
+          <Chip
+            :key="`${window.id}-${getWindowFilename(window)}`"
+            class="image-chip"
+            :label="getWindowFilename(window)"
+            removable
+            @remove="(event) => handleChipRemove(window.id, event)"
+          />
+        </div>
+      </div>
+    </aside>
 
-      <TabPanels>
-        <TabPanel
-          v-for="window in windowsList"
-          :key="window.id"
-          :value="window.id"
-        >
-          <div class="tab-content">
-            <Dropper v-if="!window.imageData" :window-id="window.id" />
-            <Controller
-              v-else
-              :window-id="window.id"
-              :window-data="window as PaperWindowState"
-            />
-          </div>
-        </TabPanel>
-      </TabPanels>
-    </Tabs>
+    <main class="active-window-content">
+      <template v-if="activeWindow">
+        <Dropper v-if="!activeWindow.imageData" :window-id="activeWindow.id" />
+        <Controller
+          v-else
+          :window-id="activeWindow.id"
+          :window-data="activeWindow as PaperWindowState"
+        />
+      </template>
+    </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useWindowsStore } from "../stores/windows";
 import Dropper from "../views/Dropper.vue";
 import Controller from "../views/Controller.vue";
-import Tabs from "primevue/tabs";
-import TabList from "primevue/tablist";
-import Tab from "primevue/tab";
-import TabPanels from "primevue/tabpanels";
-import TabPanel from "primevue/tabpanel";
 import Button from "primevue/button";
-import { Icon } from "@iconify/vue";
+import Chip from "primevue/chip";
 import type { PaperWindowState } from "../../../shared/types/window";
+
+const NEW_IMAGE_FILENAME = "New image";
 
 const windowsStore = useWindowsStore();
 
 const activeWindowId = ref<string>("");
+let localTabCounter = 0;
 let unsubscribeIpcListeners: Array<() => void> = [];
 
-// Local tabs that may not have paper windows yet
-interface LocalTab extends Partial<PaperWindowState> {
+/** Controller-side item for a future paper window. */
+interface LocalWindowItem extends Partial<PaperWindowState> {
   id: string;
   title: string;
-  imageData?: any;
+  imageData?: PaperWindowState["imageData"];
 }
 
-const localTabs = ref<LocalTab[]>([
-  {
-    id: `tab-${Date.now()}`,
-    title: "New Tab",
-  },
-]);
+type PaperWindowImageUpdatedPayload = {
+  windowId: string;
+  width: number;
+  height: number;
+  filename?: string;
+};
 
-const windowsList = computed<LocalTab[]>(() => {
-  // Merge actual windows with local tabs
+/** Creates a local image item without opening a paper window yet. */
+const createLocalWindowItem = (): LocalWindowItem => {
+  localTabCounter += 1;
+  return {
+    id: `tab-${Date.now()}-${localTabCounter}`,
+    title: NEW_IMAGE_FILENAME,
+  };
+};
+
+const localTabs = ref<LocalWindowItem[]>([createLocalWindowItem()]);
+
+const windowsList = computed<LocalWindowItem[]>(() => {
   const windows = [...windowsStore.windowsList];
   const localOnly = localTabs.value.filter(
-    (tab) => !windows.find((w) => w.id === tab.id)
+    (tab) => !windows.find((window) => window.id === tab.id)
   );
-  return [...windows, ...localOnly];
+  return [...windows, ...localOnly].reverse();
 });
 
-// Initialize active window
-if (windowsList.value.length > 0 && !activeWindowId.value) {
-  activeWindowId.value = windowsList.value[0].id;
-}
+const activeWindow = computed(() => {
+  return (
+    windowsList.value.find((window) => window.id === activeWindowId.value) ??
+    windowsList.value[0]
+  );
+});
 
-const handleTabChange = async (windowId: string) => {
-  if (windowId) {
-    windowsStore.setActiveWindow(windowId);
-    activeWindowId.value = windowId;
+/** Returns the filename shown inside the image chip. */
+const getWindowFilename = (window: LocalWindowItem): string => {
+  return window.imageData?.filename ?? NEW_IMAGE_FILENAME;
+};
 
-    // Focus the corresponding paper window if it exists
-    if (windowsStore.windowsList.find((w) => w.id === windowId)) {
-      try {
-        await window.ipc.invoke("focus-paper-window", windowId);
-      } catch (error) {
-        console.error("Failed to focus paper window:", error);
-      }
-    }
+/** Returns whether an item already has a backing paper window. */
+const hasPaperWindow = (windowId: string): boolean => {
+  return windowsStore.windowsList.some((window) => window.id === windowId);
+};
+
+/** Selects the first available image item after removal. */
+const selectFirstAvailableWindow = (): void => {
+  const nextWindow = windowsList.value[0];
+  activeWindowId.value = nextWindow?.id ?? "";
+
+  if (nextWindow && hasPaperWindow(nextWindow.id)) {
+    windowsStore.setActiveWindow(nextWindow.id);
   }
 };
 
-const handleTabRemove = async (windowId: string) => {
-  // Check if it's a local tab or a window with paper window
+/** Selects a chip and focuses its paper window when one exists. */
+const handleChipSelect = async (windowId: string): Promise<void> => {
+  if (!windowId) return;
+
+  activeWindowId.value = windowId;
+
+  if (!hasPaperWindow(windowId)) {
+    return;
+  }
+
+  windowsStore.setActiveWindow(windowId);
+
+  try {
+    await window.ipc.invoke("focus-paper-window", windowId);
+  } catch (error) {
+    console.error("Failed to focus paper window:", error);
+  }
+};
+
+/** Removes a local image item or closes its backing paper window. */
+const handleChipRemove = async (
+  windowId: string,
+  event: Event
+): Promise<void> => {
+  event.stopPropagation();
+  const wasActive = activeWindowId.value === windowId;
   const localTabIndex = localTabs.value.findIndex((tab) => tab.id === windowId);
+
   if (localTabIndex !== -1) {
-    // It's a local tab, just remove it
     localTabs.value.splice(localTabIndex, 1);
-  } else {
-    // It's a window with paper window, close the paper window
-    try {
-      await window.ipc.invoke("close-paper-window", windowId);
-    } catch (error) {
-      console.error("Failed to close paper window:", error);
+    if (wasActive) {
+      selectFirstAvailableWindow();
     }
+    return;
+  }
+
+  try {
+    await window.ipc.invoke("close-paper-window", windowId);
+  } catch (error) {
+    console.error("Failed to close paper window:", error);
   }
 };
 
-const addNewWindow = async () => {
-  // Just add a new local tab, don't create paper window yet
-  const newTab: LocalTab = {
-    id: `tab-${Date.now()}`,
-    title: "New Tab",
-  };
+/** Adds a new local image item and selects it. */
+const addNewWindow = (): void => {
+  const newTab = createLocalWindowItem();
   localTabs.value.push(newTab);
-
-  // Focus the new tab
   activeWindowId.value = newTab.id;
 };
 
-// IPC event handlers
-const handlePaperWindowCreated = (_event: any, windowState: any) => {
+/** Stores a newly created paper window and replaces its matching local item. */
+const handlePaperWindowCreated = (
+  _event: unknown,
+  windowState: PaperWindowState
+): void => {
   windowsStore.addWindow(windowState);
-  // Remove corresponding local tab if it exists
+
   const localTabIndex = localTabs.value.findIndex(
     (tab) => tab.id === windowState.id
   );
   if (localTabIndex !== -1) {
     localTabs.value.splice(localTabIndex, 1);
   }
+
   activeWindowId.value = windowState.id;
 };
 
-const handlePaperWindowClosed = (_event: any, windowId: string) => {
+/** Removes a closed paper window from the list. */
+const handlePaperWindowClosed = (_event: unknown, windowId: string): void => {
   windowsStore.removeWindow(windowId);
-  // Update active tab if needed
-  if (activeWindowId.value === windowId && windowsList.value.length > 0) {
-    activeWindowId.value = windowsList.value[0].id;
+
+  if (activeWindowId.value === windowId || !activeWindow.value) {
+    selectFirstAvailableWindow();
   }
 };
 
-const handlePaperWindowFocused = (_event: any, windowId: string) => {
+/** Mirrors paper window focus into the chip selection state. */
+const handlePaperWindowFocused = (_event: unknown, windowId: string): void => {
   windowsStore.setActiveWindow(windowId);
   activeWindowId.value = windowId;
 };
 
+/** Stores loaded image dimensions and filename for a paper window. */
 const handlePaperWindowImageUpdated = (
-  _event: any,
-  payload: { windowId: string; width: number; height: number }
-) => {
+  _event: unknown,
+  payload: PaperWindowImageUpdatedPayload
+): void => {
   const existing = windowsStore.getWindow(payload.windowId);
   if (!existing) return;
 
   windowsStore.updateWindow(payload.windowId, {
     imageData: {
       ...(existing.imageData ?? {}),
+      filename:
+        payload.filename ?? existing.imageData?.filename ?? NEW_IMAGE_FILENAME,
       width: payload.width,
       height: payload.height,
     },
@@ -190,14 +231,13 @@ const handlePaperWindowImageUpdated = (
 onMounted(async () => {
   try {
     const windowsState = await window.ipc.invoke("get-windows-state");
-    windowsState.forEach((windowState: PaperWindowState) => {
+    (windowsState as PaperWindowState[]).forEach((windowState) => {
       windowsStore.addWindow(windowState);
     });
   } catch (error) {
     console.error("Failed to initialize windows state:", error);
   }
 
-  // Set up IPC event listeners
   unsubscribeIpcListeners = [
     window.ipc.on("paper-window-created", handlePaperWindowCreated),
     window.ipc.on("paper-window-closed", handlePaperWindowClosed),
@@ -205,7 +245,6 @@ onMounted(async () => {
     window.ipc.on("paper-window-image-updated", handlePaperWindowImageUpdated),
   ];
 
-  // Set initial active tab
   if (windowsStore.activeWindowId) {
     activeWindowId.value = windowsStore.activeWindowId;
   } else if (windowsList.value.length > 0) {
@@ -221,98 +260,94 @@ onUnmounted(() => {
 
 <style scoped>
 .window-tabs {
-  --tab-list-width: 72px;
+  --image-list-min-width: 112px;
+  --active-window-width: 240px;
   --add-window-btn-size: 32px;
-  --add-window-btn-offset: 8px;
 
   height: 100%;
+  display: flex;
+  min-height: 0;
+}
+
+.image-list-pane {
+  flex: 1 1 var(--image-list-min-width);
   display: flex;
   flex-direction: column;
-  position: relative;
-}
-
-.add-window-btn {
-  position: absolute;
-  top: var(--add-window-btn-offset);
-  left: calc((var(--tab-list-width) - var(--add-window-btn-size)) / 2);
-  z-index: 10;
-  width: var(--add-window-btn-size);
-  height: var(--add-window-btn-size);
-  min-width: var(--add-window-btn-size);
-  border-radius: 50%;
-}
-
-.tab-content {
+  gap: 8px;
   height: 100%;
+  min-width: 0;
   min-height: 0;
-  overflow: hidden;
-}
-
-:deep(.p-tabs) {
-  height: 100%;
-  display: flex;
-  flex-direction: row;
-  min-height: 0;
-}
-
-:deep(.p-tablist) {
-  flex: 0 0 var(--tab-list-width);
-  height: 100%;
+  padding: 8px 6px;
   border-right: 1px solid rgba(0, 0, 0, 0.08);
   box-sizing: border-box;
 }
 
-:deep(.p-tablist-content) {
-  height: 100%;
-  padding-block-start: calc(
-    var(--add-window-btn-size) + (var(--add-window-btn-offset) * 2)
-  );
-  box-sizing: border-box;
-  overflow-y: auto;
-  overflow-x: hidden;
+.add-window-btn {
+  flex: 0 0 auto;
+  align-self: center;
+  width: var(--add-window-btn-size);
+  height: var(--add-window-btn-size);
+  min-width: var(--add-window-btn-size);
 }
 
-:deep(.p-tablist-tab-list) {
+.image-chip-list {
   display: flex;
   flex-direction: column;
-}
-
-:deep(.p-tablist-active-bar) {
-  display: none;
-}
-
-:deep(.p-tab) {
-  width: 100%;
-  justify-content: center;
-}
-
-:deep(.p-tabpanels) {
-  flex: 1;
-  height: 100%;
-  min-width: 0;
+  gap: 6px;
   min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
 }
 
-:deep(.p-tabpanel) {
+.image-chip-item {
+  width: 100%;
+  min-width: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.image-chip-item:focus-visible {
+  outline: 2px solid var(--p-primary-color, #3b82f6);
+  outline-offset: 2px;
+}
+
+.image-chip-item.is-active :deep(.image-chip) {
+  color: var(--p-primary-color, #3b82f6);
+  background: color-mix(
+    in srgb,
+    var(--p-primary-color, #3b82f6) 12%,
+    transparent
+  );
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+
+:deep(.image-chip) {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  justify-content: space-between;
+  cursor: inherit;
+}
+
+:deep(.image-chip .p-chip-label) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:deep(.image-chip .p-chip-remove-icon) {
+  flex: 0 0 auto;
+}
+
+.active-window-content {
+  flex: 0 0 var(--active-window-width);
   height: 100%;
-  padding: 0;
-}
-
-.tab-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.tab-icon {
-  width: 16px;
-  height: 16px;
-}
-
-.tab-close-btn {
-  width: 20px;
-  height: 20px;
-  padding: 0;
-  min-width: 20px;
+  width: var(--active-window-width);
+  min-width: var(--active-window-width);
+  max-width: var(--active-window-width);
+  min-height: 0;
+  overflow: hidden;
 }
 </style>

@@ -11,6 +11,7 @@ import { computed, onBeforeUnmount, onMounted, reactive } from "vue";
 
 const state = reactive({
   src: "",
+  filename: "",
   opacity: 100,
   windowId: "",
 });
@@ -66,6 +67,7 @@ const onLoad = (e: Event) => {
     windowId: state.windowId,
     width: logicalWidth,
     height: logicalHeight,
+    filename: state.filename || undefined,
   });
   const aspectRatio = logicalHeight !== 0 ? logicalWidth / logicalHeight : 1;
   window.ipc.send("link-aspect", {
@@ -120,6 +122,7 @@ onMounted(() => {
     window.ipc.on("set-image", (_, payload) => {
       state.windowId = payload.windowId ?? state.windowId;
       state.src = payload.data;
+      state.filename = payload.filename ?? "";
     }),
     window.ipc.on("init-paper-window", (_, payload) => {
       state.windowId = payload.windowId;
