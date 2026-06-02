@@ -9,6 +9,7 @@
     "resolveJsonModule": true,
     "inlineSourceMap": true,
     "baseUrl": "./",
+    "ignoreDeprecations": "6.0",
     "strict": true,
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true
