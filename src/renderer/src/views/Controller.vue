@@ -199,7 +199,7 @@ onUnmounted(() => {
       </Button>
     </div>
     <div class="opacity">
-      <label>OPACITY</label>
+      <label>Opacity</label>
       <Slider
         v-model="state.opacity"
         :min="1"
@@ -302,6 +302,7 @@ onUnmounted(() => {
   }
 }
 .clickthrough {
+  margin-top: 16px;
   width: 100%;
   .clickthrough-button {
     width: 100%;
@@ -344,6 +345,8 @@ onUnmounted(() => {
 .opacity {
   width: 100%;
   label {
+    position: relative;
+    top: -8px;
     font-size: 12px;
     font-weight: bold;
     text-transform: uppercase;

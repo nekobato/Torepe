@@ -174,7 +174,7 @@ function createPaperWindow(windowId = generateWindowId()): string {
 
 function createWindow() {
   const controllerWindowWidth = 400;
-  const controllerWindowHeight = 400;
+  const controllerWindowHeight = 320;
 
   controllerWindow = new BrowserWindow({
     title: "Torepe",

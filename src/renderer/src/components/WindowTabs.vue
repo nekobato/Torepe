@@ -335,6 +335,7 @@ onUnmounted(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  line-height: 1.2; /* bottom  */
 }
 
 :deep(.image-chip .p-chip-remove-icon) {
