@@ -1,28 +1,32 @@
-import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
-import Paper from '@/views/Paper.vue';
-import Dropper from '@/views/Dropper.vue';
-import Controller from '@/views/Controller.vue';
-import Cropper from '@/views/Cropper.vue';
+import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
+import Paper from "@/views/Paper.vue";
+import Dropper from "@/views/Dropper.vue";
+import Cropper from "@/views/Cropper.vue";
+import WindowTabs from "@/components/WindowTabs.vue";
 
 const routes: RouteRecordRaw[] = [
   {
-    path: '/paper',
-    name: 'paper',
+    path: "/",
+    redirect: "/controller",
+  },
+  {
+    path: "/paper",
+    name: "paper",
     component: Paper,
   },
   {
-    path: '/dropper',
-    name: 'dropper',
+    path: "/dropper",
+    name: "dropper",
     component: Dropper,
   },
   {
-    path: '/controller',
-    name: 'controller',
-    component: Controller,
+    path: "/controller",
+    name: "controller",
+    component: WindowTabs,
   },
   {
-    path: '/cropper',
-    name: 'cropper',
+    path: "/cropper",
+    name: "cropper",
     component: Cropper,
   },
 ];

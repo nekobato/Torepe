@@ -20,6 +20,16 @@ contextBridge.exposeInMainWorld("ipc", {
     event: string,
     callback: (event: IpcRendererEvent, ...args: any[]) => void
   ) {
-    ipcRenderer.on(event, callback);
+    const listener = (ipcEvent: IpcRendererEvent, ...args: any[]) => {
+      callback(ipcEvent, ...args);
+    };
+    ipcRenderer.on(event, listener);
+    return () => {
+      ipcRenderer.removeListener(event, listener);
+    };
+  },
+  // New methods for multi-window support
+  invoke(channel: string, ...args: any[]) {
+    return ipcRenderer.invoke(channel, ...args);
   },
 });

@@ -1,10 +1,16 @@
 <script lang="ts" setup>
-import { onMounted, reactive, render } from "vue";
-import { useRouter } from "vue-router";
+import { reactive } from "vue";
+import { useWindowsStore } from "../stores/windows";
 
-const router = useRouter();
+interface Props {
+  windowId: string;
+}
+
+const props = defineProps<Props>();
+const windowsStore = useWindowsStore();
 
 const state = reactive({ isDragOver: false });
+const CLIPBOARD_IMAGE_FILENAME = "Clipboard image";
 
 const onDragOver = () => {
   state.isDragOver = true;
@@ -19,28 +25,75 @@ const onDrop = (e: DragEvent) => {
 const onDragLeave = () => {
   state.isDragOver = false;
 };
-const onChangeFile = (e: any) => {
-  sendFile(e.target.files[0]);
+
+/**
+ * Sends the selected file to the active paper window.
+ */
+const onChangeFile = (e: Event) => {
+  const input = e.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (!file) return;
+  sendFile(file);
 };
-const sendFile = (file: File) => {
+
+/**
+ * Reads an image file and forwards its data URL with the source filename.
+ */
+const sendFile = async (file: File) => {
   const reader = new FileReader();
-  reader.onload = () => {
-    window.ipc.send("set-image", { type: "data", data: reader.result });
+  reader.onload = async () => {
+    if (typeof reader.result !== "string") return;
+
+    // Create paper window if it doesn't exist
+    const isLocalTab = !windowsStore.windowsList.find(
+      (w) => w.id === props.windowId
+    );
+    let targetWindowId = props.windowId;
+
+    if (isLocalTab) {
+      // Create paper window and get its ID
+      const newWindowId = await window.ipc.invoke(
+        "create-paper-window-with-id",
+        props.windowId
+      );
+      targetWindowId = newWindowId;
+    }
+
+    window.ipc.send("set-image", {
+      type: "data",
+      data: reader.result,
+      filename: file.name,
+      windowId: targetWindowId,
+    });
   };
   reader.readAsDataURL(file);
 };
-const fromClipboard = () => {
-  window.ipc.send("set-image", { type: "clipboard" });
-};
-const goToController = () => {
-  router.push("/controller");
-};
 
-onMounted(() => {
-  window.ipc.on("goto-controller", () => {
-    goToController();
+/**
+ * Forwards the current clipboard image using the clipboard fallback filename.
+ */
+const fromClipboard = async () => {
+  // Create paper window if it doesn't exist
+  const isLocalTab = !windowsStore.windowsList.find(
+    (w) => w.id === props.windowId
+  );
+  let targetWindowId = props.windowId;
+
+  if (isLocalTab) {
+    // Create paper window and get its ID
+    const newWindowId = await window.ipc.invoke(
+      "create-paper-window-with-id",
+      props.windowId
+    );
+    targetWindowId = newWindowId;
+  }
+
+  window.ipc.send("set-image", {
+    type: "clipboard",
+    filename: CLIPBOARD_IMAGE_FILENAME,
+    windowId: targetWindowId,
   });
-});
+};
 </script>
 <template>
   <div class="form">
@@ -60,10 +113,10 @@ onMounted(() => {
           accept="image/*"
           @change="onChangeFile"
         />
-        <span class="text-row">Select image file</span>
+        <span class="text-row">Select File</span>
       </label>
       <button class="clipboard-button" @click="fromClipboard">
-        <span class="text-row">Read clipboard</span>
+        <span class="text-row">Read Clipboard</span>
       </button>
     </div>
   </div>
@@ -73,7 +126,6 @@ onMounted(() => {
   padding: 16px;
   width: 100%;
   height: 100%;
-  background-color: #252522;
   .drag-area {
     display: flex;
     flex-direction: column;
@@ -82,6 +134,7 @@ onMounted(() => {
     text-align: center;
     border: 2px dotted rgba(255, 255, 255, 0.16);
     border-radius: 8px;
+    padding: 16px;
     &.on-dragover {
       border: 2px dotted rgba(255, 255, 255, 0.48);
     }
@@ -103,7 +156,7 @@ onMounted(() => {
     align-items: center;
     justify-content: center;
     margin: 0 auto;
-    width: 160px;
+    width: 100%;
     height: 40px;
     border: 1px solid rgba(255, 255, 255, 0.24);
     border-radius: 4px;

@@ -1,14 +1,15 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "node",
+    "target": "esnext",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "importHelpers": true,
     "jsx": "preserve",
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "inlineSourceMap": true,
     "baseUrl": "./",
+    "ignoreDeprecations": "6.0",
     "strict": true,
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true

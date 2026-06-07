@@ -32,3 +32,8 @@ dist-ssr
 docs/
 
 electron-builder.env
+
+# CLAUDE
+.claude/
+prompts/
+AGENTS.md
