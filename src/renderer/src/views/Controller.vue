@@ -90,6 +90,7 @@ watch(
       opacity: newOpacity,
       windowId: props.windowId,
     });
+    windowsStore.updateWindow(props.windowId, { opacity: newOpacity / 100 });
   }
 );
 

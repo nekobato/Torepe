@@ -49,8 +49,7 @@ const onLoad = (e: Event) => {
 
   try {
     const arrayBuffer = dataUrlToArrayBuffer(state.src);
-    const buffer = Buffer.from(arrayBuffer);
-    const { width, height, dpi } = parsePngFormat(buffer);
+    const { width, height, dpi } = parsePngFormat(arrayBuffer);
     const scale = dpi && dpi > 0 ? dpi / 72 : 1;
 
     if (width && height && scale > 0) {

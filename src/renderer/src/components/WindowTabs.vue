@@ -42,6 +42,7 @@
         <Dropper v-if="!activeWindow.imageData" :window-id="activeWindow.id" />
         <Controller
           v-else
+          :key="activeWindow.id"
           :window-id="activeWindow.id"
           :window-data="activeWindow as PaperWindowState"
         />
