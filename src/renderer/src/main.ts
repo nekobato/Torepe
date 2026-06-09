@@ -4,12 +4,15 @@ import PrimeVue from "primevue/config";
 import Aura from "@primevue/themes/aura";
 import router from "./router";
 import App from "./App.vue";
+import { initSentry } from "./sentry";
 import "@/styles/reset.css";
 import "@/styles/fonts.css";
 import "primeicons/primeicons.css";
 
 const app = createApp(App);
 const pinia = createPinia();
+
+initSentry(app);
 
 app
   .use(pinia)

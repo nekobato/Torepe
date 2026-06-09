@@ -50,6 +50,7 @@
   },
   "dependencies": {
     "@primevue/themes": "4.4.1",
+    "@sentry/electron": "7.13.0",
     "png-dpi-reader-writer": "0.2.4",
     "primeicons": "7.0.0",
     "primevue": "4.4.1"

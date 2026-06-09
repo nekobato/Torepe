@@ -10,9 +10,12 @@ import {
 import { release } from "os";
 import log from "electron-log";
 import { checkUpdate } from "./autoupdater";
+import { initSentry } from "./sentry";
 import { pageRoot, preload } from "./static";
 import type { PaperWindowState } from "../shared/types/window";
 const isDevelopment = process.env.NODE_ENV === "development";
+
+initSentry();
 
 // Disable GPU Acceleration for Windows 7
 if (release().startsWith("6.1")) app.disableHardwareAcceleration();
