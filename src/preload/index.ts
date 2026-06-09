@@ -1,3 +1,7 @@
+if (__SENTRY_ENABLED__) {
+  require("@sentry/electron/preload");
+}
+
 import { contextBridge, ipcRenderer, IpcRendererEvent } from "electron";
 import { domReady } from "./utils";
 import { useLoading } from "./loading";
