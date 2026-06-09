@@ -28,32 +28,32 @@
   "devDependencies": {
     "@electron/notarize": "3.1.1",
     "@iconify/vue": "5.0.1",
-    "@types/node": "24.7.2",
-    "@vitejs/plugin-vue": "6.0.6",
+    "@types/node": "25.9.1",
+    "@vitejs/plugin-vue": "6.0.7",
     "dotenv": "17.4.2",
-    "electron": "42.2.0",
-    "electron-builder": "26.8.1",
+    "electron": "42.3.0",
+    "electron-builder": "26.13.0",
     "electron-icon-builder": "2.0.1",
-    "electron-log": "5.4.3",
-    "electron-updater": "6.6.2",
+    "electron-log": "5.4.4",
+    "electron-updater": "6.8.8",
     "electron-vite": "5.0.0",
     "pinia": "3.0.4",
-    "prettier": "3.6.2",
-    "sass-embedded": "1.93.2",
+    "prettier": "3.8.3",
+    "sass-embedded": "1.100.0",
     "typescript": "6.0.3",
-    "vite": "8.0.10",
-    "vite-plugin-electron": "0.29.0",
-    "vite-plugin-electron-renderer": "0.14.6",
-    "vue": "3.5.22",
-    "vue-router": "5.0.6",
-    "vue-tsc": "3.2.8"
+    "vite": "8.0.14",
+    "vite-plugin-electron": "1.0.0",
+    "vite-plugin-electron-renderer": "1.0.0",
+    "vue": "3.5.35",
+    "vue-router": "5.1.0",
+    "vue-tsc": "3.3.3"
   },
   "dependencies": {
-    "@primevue/themes": "4.4.1",
+    "@primevue/themes": "4.5.4",
     "@sentry/electron": "7.13.0",
     "png-dpi-reader-writer": "0.2.4",
     "primeicons": "7.0.0",
-    "primevue": "4.4.1"
+    "primevue": "4.5.5"
   },
   "packageManager": "pnpm@9.15.0+sha512.76e2379760a4328ec4415815bcd6628dee727af3779aaa4c914e3944156c4299921a89f976381ee107d41f12cfa4b66681ca9c718f0668fa0831ed4c6d8ba56c"
 }
