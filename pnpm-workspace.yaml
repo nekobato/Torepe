@@ -1,0 +1,15 @@
+packages:
+  - "."
+
+nodeLinker: hoisted
+
+allowBuilds:
+  "@parcel/watcher": false
+  electron: true
+  electron-winstaller: true
+  esbuild: true
+  phantomjs-prebuilt: true
+  vue-demi: true
+
+overrides:
+  plist: 3.1.1
