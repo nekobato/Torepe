@@ -28,10 +28,10 @@
   "devDependencies": {
     "@electron/notarize": "3.1.1",
     "@iconify/vue": "5.0.1",
-    "@types/node": "25.9.3",
+    "@types/node": "26.0.0",
     "@vitejs/plugin-vue": "6.0.7",
     "dotenv": "17.4.2",
-    "electron": "42.4.0",
+    "electron": "42.4.1",
     "electron-builder": "26.15.3",
     "electron-icon-builder": "2.0.1",
     "electron-log": "5.4.4",
@@ -46,7 +46,7 @@
     "vite-plugin-electron-renderer": "1.0.0",
     "vue": "3.5.38",
     "vue-router": "5.1.0",
-    "vue-tsc": "3.3.4"
+    "vue-tsc": "3.3.5"
   },
   "dependencies": {
     "@primevue/themes": "4.5.4",
