@@ -18,6 +18,9 @@ const config = {
     entitlementsInherit: "build/entitlements.mac.plist",
     publish: ["github"],
   },
+  dmg: {
+    writeUpdateInfo: false,
+  },
   win: {
     target: [
       {
