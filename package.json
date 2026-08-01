@@ -40,20 +40,18 @@
     "pinia": "3.0.4",
     "prettier": "3.9.5",
     "sass-embedded": "1.100.0",
-    "typescript": "7.0.2",
+    "typescript": "6.0.3",
     "vite": "8.1.4",
     "vite-plugin-electron": "1.1.0",
     "vite-plugin-electron-renderer": "1.0.0",
     "vue": "3.5.39",
     "vue-router": "5.1.0",
-    "vue-tsc": "3.3.7"
+    "vue-tsc": "3.3.9"
   },
   "dependencies": {
-    "@primevue/themes": "4.5.4",
     "@sentry/electron": "7.15.0",
-    "png-dpi-reader-writer": "0.2.4",
-    "primeicons": "7.0.0",
-    "primevue": "4.5.5"
+    "element-plus": "2.14.3",
+    "png-dpi-reader-writer": "0.2.4"
   },
   "packageManager": "pnpm@11.6.0+sha512.9a36518224080c6fe5165afdcfe79bfa118c29be703f3f462b1e32efe1e98e47e8750b148e08286250aad4113cc7993ca413c4e2cd447752708c2ee5751bc95f"
 }

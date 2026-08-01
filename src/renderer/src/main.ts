@@ -1,30 +1,23 @@
 import { createApp } from "vue";
 import { createPinia } from "pinia";
-import PrimeVue from "primevue/config";
-import Aura from "@primevue/themes/aura";
 import router from "./router";
 import App from "./App.vue";
 import { initSentry } from "./sentry";
+import "element-plus/theme-chalk/base.css";
+import "element-plus/theme-chalk/el-button.css";
+import "element-plus/theme-chalk/el-input.css";
+import "element-plus/theme-chalk/el-input-number.css";
+import "element-plus/theme-chalk/el-popper.css";
+import "element-plus/theme-chalk/el-tooltip.css";
+import "element-plus/theme-chalk/el-slider.css";
+import "element-plus/theme-chalk/el-tag.css";
+import "element-plus/theme-chalk/dark/css-vars.css";
 import "@/styles/reset.css";
 import "@/styles/fonts.css";
-import "primeicons/primeicons.css";
 
 const app = createApp(App);
 const pinia = createPinia();
 
 initSentry(app);
 
-app
-  .use(pinia)
-  .use(router)
-  .use(PrimeVue, {
-    theme: {
-      preset: Aura,
-      options: {
-        darkModeSelector: "system",
-        cssLayer: false,
-      },
-    },
-  })
-  .mount("#app")
-  .$nextTick(window.removeLoading);
+app.use(pinia).use(router).mount("#app").$nextTick(window.removeLoading);

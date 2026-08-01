@@ -1,9 +1,7 @@
 <script lang="ts" setup>
-import { reactive, watch, onMounted, onUnmounted } from "vue";
+import { reactive, ref, watch, onMounted, onUnmounted } from "vue";
 import { Icon } from "@iconify/vue";
-import Button from "primevue/button";
-import Slider from "primevue/slider";
-import InputNumber from "primevue/inputnumber";
+import { ElButton, ElInputNumber, ElSlider } from "element-plus";
 import { useWindowsStore } from "../stores/windows";
 import type { PaperWindowState } from "../../../shared/types/window";
 
@@ -15,21 +13,22 @@ interface Props {
 const props = defineProps<Props>();
 const windowsStore = useWindowsStore();
 let unsubscribeWindowRectangle: (() => void) | undefined;
+const isControllerReady = ref(false);
 
 const state = reactive({
-  clickThrough: false,
-  opacity: 100,
+  clickThrough: props.windowData.clickThrough,
+  opacity: props.windowData.opacity * 100,
   windowPosition: {
-    x: 0,
-    y: 0,
+    x: props.windowData.bounds.x,
+    y: props.windowData.bounds.y,
   },
   windowSize: {
-    width: 0,
-    height: 0,
+    width: props.windowData.bounds.width,
+    height: props.windowData.bounds.height,
   },
   imageSize: {
-    width: 0,
-    height: 0,
+    width: props.windowData.imageData?.width ?? 0,
+    height: props.windowData.imageData?.height ?? 0,
   },
   aspectLink: true,
 });
@@ -44,32 +43,48 @@ const toggleClickThrough = () => {
   windowsStore.updateWindow(props.windowId, { clickThrough: nextClickThrough });
 };
 const onChangeWidth = (newWidth?: number) => {
-  if (state.aspectLink) {
-    state.windowSize.height = Math.round(
-      Number(newWidth) / (state.windowSize.width / state.windowSize.height)
-    );
-    state.windowSize.width = Number(newWidth);
-  } else {
-    state.windowSize.width = Number(newWidth);
+  if (
+    !isControllerReady.value ||
+    newWidth === undefined ||
+    !Number.isFinite(newWidth)
+  ) {
+    return;
   }
 
+  const oldWidth = state.windowSize.width;
+  if (state.aspectLink && oldWidth > 0) {
+    state.windowSize.height = Math.round(
+      newWidth / (oldWidth / state.windowSize.height)
+    );
+  }
+  state.windowSize.width = newWidth;
+
   window.ipc.send("set-bounds", {
-    width: Number(state.windowSize.width),
-    height: Number(state.windowSize.height),
+    width: state.windowSize.width,
+    height: state.windowSize.height,
     windowId: props.windowId,
   });
 };
 const onChangeHeight = (newHeight?: number) => {
-  if (state.aspectLink) {
+  if (
+    !isControllerReady.value ||
+    newHeight === undefined ||
+    !Number.isFinite(newHeight)
+  ) {
+    return;
+  }
+
+  const oldHeight = state.windowSize.height;
+  if (state.aspectLink && oldHeight > 0) {
     state.windowSize.width = Math.round(
-      Number(newHeight) * (state.windowSize.width / state.windowSize.height)
+      newHeight * (state.windowSize.width / oldHeight)
     );
   }
-  state.windowSize.height = Number(newHeight);
+  state.windowSize.height = newHeight;
 
   window.ipc.send("set-bounds", {
-    width: Number(state.windowSize.width),
-    height: Number(state.windowSize.height),
+    width: state.windowSize.width,
+    height: state.windowSize.height,
     windowId: props.windowId,
   });
 };
@@ -123,34 +138,15 @@ const handleWindowRectangle = (event: any, payload: any) => {
 };
 
 onMounted(() => {
-  // Initialize state from window data
-  if (props.windowData) {
-    state.windowPosition = {
-      x: props.windowData.bounds.x,
-      y: props.windowData.bounds.y,
-    };
-    state.windowSize = {
-      width: props.windowData.bounds.width,
-      height: props.windowData.bounds.height,
-    };
-    state.opacity = props.windowData.opacity * 100;
-    state.clickThrough = props.windowData.clickThrough;
-
-    if (props.windowData.imageData) {
-      state.imageSize = {
-        width: props.windowData.imageData.width,
-        height: props.windowData.imageData.height,
-      };
-    }
-  }
-
   unsubscribeWindowRectangle = window.ipc.on(
     "window-rectangle",
     handleWindowRectangle
   );
+  isControllerReady.value = true;
 });
 
 onUnmounted(() => {
+  isControllerReady.value = false;
   unsubscribeWindowRectangle?.();
   unsubscribeWindowRectangle = undefined;
 });
@@ -166,9 +162,10 @@ onUnmounted(() => {
     <div class="size-fields">
       <div class="form-item">
         <label>Width</label>
-        <InputNumber
-          v-model="state.windowSize.width"
+        <ElInputNumber
+          :model-value="state.windowSize.width"
           :min="1"
+          :controls="false"
           size="small"
           class="input"
           @update:model-value="onChangeWidth"
@@ -176,20 +173,24 @@ onUnmounted(() => {
       </div>
       <div class="form-item">
         <label>Height</label>
-        <InputNumber
-          v-model="state.windowSize.height"
+        <ElInputNumber
+          :model-value="state.windowSize.height"
           :min="1"
+          :controls="false"
           size="small"
           class="input"
           @update:model-value="onChangeHeight"
         />
       </div>
-      <Button
+      <ElButton
         class="link-aspect-button"
         @click="linkAspect"
         text
         size="small"
-        rounded
+        circle
+        :aria-label="
+          state.aspectLink ? 'Unlink aspect ratio' : 'Link aspect ratio'
+        "
       >
         <Icon
           icon="mingcute:link-2-line"
@@ -197,11 +198,11 @@ onUnmounted(() => {
           v-if="state.aspectLink"
         />
         <Icon icon="mingcute:unlink-2-line" class="link-aspect-icon" v-else />
-      </Button>
+      </ElButton>
     </div>
     <div class="opacity">
       <label>Opacity</label>
-      <Slider
+      <ElSlider
         v-model="state.opacity"
         :min="1"
         :max="100"
@@ -209,7 +210,7 @@ onUnmounted(() => {
       />
     </div>
     <div class="clickthrough">
-      <Button
+      <ElButton
         class="clickthrough-button"
         :class="{
           on: state.clickThrough,
@@ -227,7 +228,7 @@ onUnmounted(() => {
         <span>IgnoreMouse is</span>
         <span class="state on" v-if="state.clickThrough">ON</span>
         <span class="state off" v-else>OFF</span>
-      </Button>
+      </ElButton>
     </div>
   </div>
 </template>
@@ -262,9 +263,6 @@ onUnmounted(() => {
       text-transform: uppercase;
     }
     .input {
-      width: 100%;
-    }
-    :deep(.p-inputnumber-input) {
       width: 100%;
     }
   }

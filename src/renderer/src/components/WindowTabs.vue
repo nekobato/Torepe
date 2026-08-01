@@ -1,38 +1,42 @@
 <template>
   <div class="window-tabs">
     <aside class="image-list-pane" aria-label="Image list">
-      <Button
+      <ElButton
         class="add-window-btn"
-        icon="pi pi-plus"
-        severity="primary"
+        type="primary"
         size="small"
-        rounded
+        circle
         aria-label="Add image"
         title="Add image"
         @click="addNewWindow"
-      />
+      >
+        <Icon icon="mingcute:add-line" />
+      </ElButton>
 
-      <div class="image-chip-list" role="listbox" aria-label="Images">
+      <div class="image-tag-list" role="listbox" aria-label="Images">
         <div
           v-for="window in windowsList"
           :key="window.id"
-          class="image-chip-item"
+          class="image-tag-item"
           :class="{ 'is-active': activeWindowId === window.id }"
           role="option"
           :aria-selected="activeWindowId === window.id"
           tabindex="0"
           :title="getWindowFilename(window)"
-          @click="() => handleChipSelect(window.id)"
-          @keydown.enter.prevent="() => handleChipSelect(window.id)"
-          @keydown.space.prevent="() => handleChipSelect(window.id)"
+          @click="() => handleItemSelect(window.id)"
+          @keydown.enter.prevent="() => handleItemSelect(window.id)"
+          @keydown.space.prevent="() => handleItemSelect(window.id)"
         >
-          <Chip
+          <ElTag
             :key="`${window.id}-${getWindowFilename(window)}`"
-            class="image-chip"
-            :label="getWindowFilename(window)"
-            removable
-            @remove="(event) => handleChipRemove(window.id, event)"
-          />
+            class="image-tag"
+            closable
+            round
+            :disable-transitions="true"
+            @close="(event) => handleItemRemove(window.id, event)"
+          >
+            {{ getWindowFilename(window) }}
+          </ElTag>
         </div>
       </div>
     </aside>
@@ -53,11 +57,11 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from "vue";
+import { Icon } from "@iconify/vue";
+import { ElButton, ElTag } from "element-plus";
 import { useWindowsStore } from "../stores/windows";
 import Dropper from "../views/Dropper.vue";
 import Controller from "../views/Controller.vue";
-import Button from "primevue/button";
-import Chip from "primevue/chip";
 import type { PaperWindowState } from "../../../shared/types/window";
 
 const NEW_IMAGE_FILENAME = "New image";
@@ -108,7 +112,7 @@ const activeWindow = computed(() => {
   );
 });
 
-/** Returns the filename shown inside the image chip. */
+/** Returns the filename shown inside the image item. */
 const getWindowFilename = (window: LocalWindowItem): string => {
   return window.imageData?.filename ?? NEW_IMAGE_FILENAME;
 };
@@ -128,8 +132,8 @@ const selectFirstAvailableWindow = (): void => {
   }
 };
 
-/** Selects a chip and focuses its paper window when one exists. */
-const handleChipSelect = async (windowId: string): Promise<void> => {
+/** Selects an image item and focuses its paper window when one exists. */
+const handleItemSelect = async (windowId: string): Promise<void> => {
   if (!windowId) return;
 
   activeWindowId.value = windowId;
@@ -148,7 +152,7 @@ const handleChipSelect = async (windowId: string): Promise<void> => {
 };
 
 /** Removes a local image item or closes its backing paper window. */
-const handleChipRemove = async (
+const handleItemRemove = async (
   windowId: string,
   event: Event
 ): Promise<void> => {
@@ -204,7 +208,7 @@ const handlePaperWindowClosed = (_event: unknown, windowId: string): void => {
   }
 };
 
-/** Mirrors paper window focus into the chip selection state. */
+/** Mirrors paper window focus into the image item selection state. */
 const handlePaperWindowFocused = (_event: unknown, windowId: string): void => {
   windowsStore.setActiveWindow(windowId);
   activeWindowId.value = windowId;
@@ -219,6 +223,11 @@ const handlePaperWindowImageUpdated = (
   if (!existing) return;
 
   windowsStore.updateWindow(payload.windowId, {
+    bounds: {
+      ...existing.bounds,
+      width: payload.width,
+      height: payload.height,
+    },
     imageData: {
       ...(existing.imageData ?? {}),
       filename:
@@ -291,7 +300,7 @@ onUnmounted(() => {
   min-width: var(--add-window-btn-size);
 }
 
-.image-chip-list {
+.image-tag-list {
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -301,29 +310,29 @@ onUnmounted(() => {
   scrollbar-gutter: stable;
 }
 
-.image-chip-item {
+.image-tag-item {
   width: 100%;
   min-width: 0;
   border-radius: 999px;
   cursor: pointer;
 }
 
-.image-chip-item:focus-visible {
-  outline: 2px solid var(--p-primary-color, #3b82f6);
+.image-tag-item:focus-visible {
+  outline: 2px solid var(--el-color-primary, #409eff);
   outline-offset: 2px;
 }
 
-.image-chip-item.is-active :deep(.image-chip) {
-  color: var(--p-primary-color, #3b82f6);
+.image-tag-item.is-active :deep(.image-tag) {
+  color: var(--el-color-primary, #409eff);
   background: color-mix(
-    in srgb,
-    var(--p-primary-color, #3b82f6) 12%,
+    in oklab,
+    var(--el-color-primary, #409eff) 12%,
     transparent
   );
   box-shadow: inset 0 0 0 1px currentColor;
 }
 
-:deep(.image-chip) {
+:deep(.image-tag) {
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -331,15 +340,15 @@ onUnmounted(() => {
   cursor: inherit;
 }
 
-:deep(.image-chip .p-chip-label) {
+:deep(.image-tag .el-tag__content) {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  line-height: 1.2; /* bottom  */
+  line-height: 1.2;
 }
 
-:deep(.image-chip .p-chip-remove-icon) {
+:deep(.image-tag .el-tag__close) {
   flex: 0 0 auto;
 }
 

@@ -59,6 +59,44 @@ function sendToController(channel: string, payload: unknown): void {
 }
 
 /**
+ * Keeps a paper window hidden and reports an image read or decode failure.
+ */
+function reportImageLoadError(
+  paperWindow: BrowserWindow | null | undefined,
+  filename?: unknown,
+  reason?: unknown
+): void {
+  if (paperWindow && !paperWindow.isDestroyed()) {
+    paperWindow.hide();
+  }
+
+  const imageName =
+    typeof filename === "string" && filename.trim().length > 0
+      ? `「${filename}」`
+      : "選択した画像";
+  const detail = `${imageName}を読み込めませんでした。画像が壊れているか、対応していない形式の可能性があります。`;
+
+  log.warn("Failed to load paper image", {
+    filename: typeof filename === "string" ? filename : undefined,
+    reason,
+  });
+
+  if (controllerWindow && !controllerWindow.isDestroyed()) {
+    void dialog
+      .showMessageBox(controllerWindow, {
+        type: "error",
+        title: "画像を開けません",
+        message: "画像を表示できませんでした",
+        detail,
+      })
+      .catch((error) => log.error("Failed to show image error dialog", error));
+    return;
+  }
+
+  dialog.showErrorBox("画像を開けません", detail);
+}
+
+/**
  * Loads the paper view for a BrowserWindow.
  */
 function loadPaperWindow(paperWindow: BrowserWindow): void {
@@ -302,8 +340,7 @@ function createWindow() {
 
         const sendToPaperWindow = () => {
           if (paperWindow.isDestroyed()) return;
-          paperWindow.center();
-          paperWindow.show();
+          paperWindow.hide();
           paperWindow.webContents.send(event, payload);
         };
 
@@ -315,26 +352,59 @@ function createWindow() {
 
         break;
       }
-      case "set-image-size":
+      case "set-image-size": {
         if (paperWindow && !paperWindow.isDestroyed()) {
-          paperWindow.setSize(payload.width, payload.height);
+          const width = Math.round(Number(payload.width));
+          const height = Math.round(Number(payload.height));
+
+          if (
+            !Number.isFinite(width) ||
+            !Number.isFinite(height) ||
+            width <= 0 ||
+            height <= 0
+          ) {
+            reportImageLoadError(
+              paperWindow,
+              payload.filename,
+              "invalid-image-dimensions"
+            );
+            break;
+          }
+
+          try {
+            paperWindow.setSize(width, height);
+            paperWindow.center();
+            paperWindow.show();
+          } catch (error) {
+            reportImageLoadError(paperWindow, payload.filename, error);
+            break;
+          }
+
           if (controllerWindow && !controllerWindow.isDestroyed()) {
             controllerWindow.webContents.send("paper-window-image-updated", {
               windowId,
-              width: payload.width,
-              height: payload.height,
+              width,
+              height,
               filename: payload.filename,
             });
             controllerWindow.webContents.send("window-rectangle", {
               windowId,
               x: paperWindow.getBounds().x,
               y: paperWindow.getBounds().y,
-              width: payload.width,
-              height: payload.height,
+              width,
+              height,
               original: true,
             });
           }
         }
+        break;
+      }
+      case "image-load-error":
+        reportImageLoadError(
+          paperWindow,
+          payload.filename,
+          payload.reason ?? "image-decode-failed"
+        );
         break;
       case "reset-image":
         if (paperWindow && !paperWindow.isDestroyed()) {

@@ -19,7 +19,7 @@ const onDrop = (e: DragEvent) => {
   if (!e.dataTransfer || !e.dataTransfer.files.length) return;
   const file = e.dataTransfer.files[0];
   if (!/^image\//.test(file.type)) return;
-  sendFile(file);
+  void sendFile(file);
   state.isDragOver = false;
 };
 const onDragLeave = () => {
@@ -32,8 +32,9 @@ const onDragLeave = () => {
 const onChangeFile = (e: Event) => {
   const input = e.target as HTMLInputElement;
   const file = input.files?.[0];
+  input.value = "";
   if (!file) return;
-  sendFile(file);
+  void sendFile(file);
 };
 
 /**
@@ -41,6 +42,13 @@ const onChangeFile = (e: Event) => {
  */
 const sendFile = async (file: File) => {
   const reader = new FileReader();
+  reader.onerror = () => {
+    window.ipc.send("image-load-error", {
+      windowId: props.windowId,
+      filename: file.name,
+      reason: "file-read-failed",
+    });
+  };
   reader.onload = async () => {
     if (typeof reader.result !== "string") return;
 

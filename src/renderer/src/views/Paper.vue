@@ -1,6 +1,13 @@
 <template>
   <div class="paper" :style="paperStyle">
-    <img class="image" :src="state.src" ref="image" @load="onLoad" />
+    <img
+      v-if="state.src"
+      class="image"
+      :src="state.src"
+      alt=""
+      @load="onLoad"
+      @error="onError"
+    />
     <div class="overlayer" />
   </div>
 </template>
@@ -44,6 +51,11 @@ const onLoad = (e: Event) => {
     return;
   }
 
+  if (imageElement.naturalWidth <= 0 || imageElement.naturalHeight <= 0) {
+    onError();
+    return;
+  }
+
   let logicalWidth = imageElement.naturalWidth;
   let logicalHeight = imageElement.naturalHeight;
 
@@ -73,6 +85,21 @@ const onLoad = (e: Event) => {
     link: true,
     ratio: aspectRatio,
     windowId: state.windowId,
+  });
+};
+
+/** Reports a decode failure and clears the source so it can be retried. */
+const onError = () => {
+  const windowId = state.windowId;
+  const filename = state.filename;
+  state.src = "";
+
+  if (!windowId) return;
+
+  window.ipc.send("image-load-error", {
+    windowId,
+    filename: filename || undefined,
+    reason: "image-decode-failed",
   });
 };
 
