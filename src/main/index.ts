@@ -2,7 +2,6 @@ import {
   BrowserWindow,
   Menu,
   app,
-  clipboard,
   dialog,
   ipcMain,
   protocol,
@@ -10,6 +9,7 @@ import {
 import { release } from "os";
 import log from "electron-log";
 import { checkUpdate } from "./autoupdater";
+import { readClipboardImage } from "./clipboard-image";
 import { initSentry } from "./sentry";
 import { pageRoot, preload } from "./static";
 import type { PaperWindowState } from "../shared/types/window";
@@ -276,7 +276,7 @@ function createWindow() {
     return states;
   });
 
-  ipcMain.on("renderer-event", (_, event: string, payload: any) => {
+  ipcMain.on("renderer-event", async (_, event: string, payload: any) => {
     const windowId =
       typeof payload?.windowId === "string" ? payload.windowId : undefined;
     const paperWindow = windowId ? paperWindows.get(windowId) : null;
@@ -319,17 +319,22 @@ function createWindow() {
         break;
       case "set-image": {
         if (payload.type === "clipboard") {
-          const image = clipboard.readImage();
-          if (image.isEmpty()) {
-            dialog.showErrorBox(
-              "クリップボードに画像がありません",
-              "画像をコピーしてから再度お試しください"
-            );
+          try {
+            const image = await readClipboardImage();
+            if (image.isEmpty()) {
+              dialog.showErrorBox(
+                "クリップボードに画像がありません",
+                "画像をコピーしてから再度お試しください"
+              );
+              return;
+            }
+
+            payload.data = image.toDataURL();
+            payload.filename = payload.filename ?? "Clipboard image";
+          } catch (error) {
+            reportImageLoadError(paperWindow, payload.filename, error);
             return;
           }
-
-          payload.data = image.toDataURL();
-          payload.filename = payload.filename ?? "Clipboard image";
         }
 
         if (!paperWindow || paperWindow.isDestroyed()) {
