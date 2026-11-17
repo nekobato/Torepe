@@ -9,6 +9,10 @@
   </a>
 </p>
 
+## ダウンロード
+
+[Download macOS / Apple Silicon DMG](https://github.com/nekobato/Torepe/releases/download/v1.6.5/Torepe-1.6.5-arm64.dmg)
+
 ## Screenshots
 
 ![image](https://user-images.githubusercontent.com/861170/94355771-fab84300-00c1-11eb-8d00-2d1d841a4c52.png)

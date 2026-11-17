@@ -6,6 +6,10 @@ Torepe: クリップボードやファイルからスクリーン上に画像を
   <img alt="Version" src="https://img.shields.io/github/package-json/v/nekobato/torepe">
 </p>
 
+## ダウンロード
+
+[Download macOS / Apple Silicon DMG](https://github.com/nekobato/Torepe/releases/download/v1.6.5/Torepe-1.6.5-arm64.dmg)
+
 ## Screenshots
 
 ![Screenshot1 - Torepe](https://github.com/nekobato/Torepe/assets/861170/056aa4d8-ec72-4b0e-9cc1-9719659625fe)
